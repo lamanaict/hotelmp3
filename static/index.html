@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelMP3 — Spatial AV Control</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   HOTELMP3 — GLASS UI THEME
+   Based on Resource/UI_Glass.jpg design analysis
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Primary palette from UI_Glass.jpg */
+  --bg-cream: #f3e7db;
+  --bg-cream-light: #f5f0ed;
+  --bg-cream-dark: #e4d2c8;
+  --bg-surface: #ded4cb;
+  --bg-surface-2: #d2c7c5;
+  --bg-surface-3: #c7bcba;
+  
+  /* Dark sidebar from UI_Glass.jpg */
+  --sidebar-bg: #3b4c5c;
+  --sidebar-bg-light: #424e5c;
+  --sidebar-bg-dark: #2f3d4a;
+  --sidebar-border: #4a5d6e;
+  
+  /* Accent colors */
+  --accent-purple: #cdb9ea;
+  --accent-blue: #aab9f4;
+  --accent-warm: #c7b4ad;
+  --accent-gold: #d4a574;
+  
+  /* Text colors */
+  --text-primary: #2a3440;
+  --text-secondary: #4a5d6e;
+  --text-muted: #7a8a9a;
+  --text-light: #f0e2d7;
+  --text-light-dim: #b0a090;
+  
+  /* Status colors */
+  --green: #5cb85c;
+  --red: #d9534f;
+  --orange: #f0ad4e;
+  --blue: #5bc0de;
+  
+  /* HUD overlay */
+  --hud-bg: rgba(59, 76, 92, 0.85);
+  --hud-text: #f0e2d7;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-cream);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── TOPBAR (HUD-style overlay) ─── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: var(--hud-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 48px;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: -0.5px;
+}
+
+.topbar-logo span {
+  color: var(--accent-blue);
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--hud-text);
+  opacity: 0.7;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.status-dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(92, 184, 92, 0.5);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: var(--hud-text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topbar-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.topbar-btn.active {
+  border-color: var(--accent-blue);
+  background: rgba(170, 185, 244, 0.2);
+  color: var(--accent-blue);
+}
+
+.hud-latency {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.2);
+  font-size: 10px;
+  color: var(--hud-text);
+  opacity: 0.6;
+}
+
+/* ─── MAIN LAYOUT ─── */
+.main-layout {
+  display: flex;
+  height: calc(100vh - 48px);
+}
+
+/* ─── SIDEBAR (Dark glass panel) ─── */
+.sidebar {
+  width: 320px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.sidebar-tab:hover {
+  color: var(--text-light);
+}
+
+.sidebar-tab.active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+}
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── ZONE CARDS (Glass morphism) ─── */
+.zone-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.zone-card:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.zone-card.selected {
+  border-color: var(--accent-blue);
+  background: rgba(170, 185, 244, 0.15);
+  box-shadow: 0 0 12px rgba(170, 185, 244, 0.2);
+}
+
+.zone-card.off { opacity: 0.4; }
+
+.zone-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.zone-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.zone-type {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.08);
+}
+
+.zone-card.on .zone-type {
+  background: rgba(92, 184, 92, 0.2);
+  color: var(--green);
+}
+
+.zone-source {
+  font-size: 10px;
+  color: var(--text-light-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zone-volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vol-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.vol-fill {
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.vol-num {
+  font-size: 9px;
+  color: var(--text-light-dim);
+  font-weight: 600;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ─── MAIN CONTENT AREA ─── */
+.main-content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  background: var(--bg-cream);
+}
+
+/* ─── ZONE DETAIL PANEL ─── */
+.zone-detail {
+  background: var(--bg-cream-light);
+  border: 1px solid var(--bg-surface-3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.zone-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.zone-detail-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ─── POWER TOGGLE ─── */
+.power-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.power-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.toggle-switch {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-surface-3);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch.on {
+  background: var(--green);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-switch.on::after {
+  transform: translateX(16px);
+}
+
+/* ─── SOURCE SELECTOR ─── */
+.source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.source-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bg-surface-3);
+  background: var(--bg-cream);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.source-option:hover {
+  border-color: var(--accent-blue);
+}
+
+.source-option.active {
+  border-color: var(--accent-blue);
+  background: rgba(170, 185, 244, 0.15);
+}
+
+.source-icon {
+  font-size: 14px;
+}
+
+.source-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* ─── EQ / MIXER ─── */
+.mixer-section {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.mixer-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.eq-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.eq-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  width: 28px;
+  text-align: right;
+}
+
+.eq-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--bg-surface-3);
+  border-radius: 2px;
+  outline: none;
+}
+
+.eq-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.eq-val {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 20px;
+  text-align: center;
+}
+
+/* ─── MEDIA PLAYER ─── */
+.media-player {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.mp-source-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.mp-source-tab {
+  flex: 1;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: 1px solid var(--bg-surface-3);
+  background: var(--bg-cream);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mp-source-tab:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.mp-source-tab.active {
+  border-color: var(--accent-blue);
+  background: rgba(170, 185, 244, 0.15);
+  color: var(--accent-blue);
+}
+
+.mp-player-container {
+  margin-bottom: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-now-playing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mp-track-icon {
+  font-size: 16px;
+}
+
+.mp-track-info {
+  flex: 1;
+}
+
+.mp-track-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-track-meta {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.mp-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mp-time {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 30px;
+}
+
+.mp-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mp-progress-fill {
+  height: 100%;
+  background: var(--accent-purple);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.mp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.mp-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--bg-surface-3);
+  background: var(--bg-cream);
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.mp-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.mp-btn.play {
+  width: 36px;
+  height: 36px;
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  font-size: 12px;
+}
+
+.mp-btn.play:hover {
+  background: var(--accent-purple);
+  border-color: var(--accent-purple);
+}
+
+/* ─── MEDIA PLAYLIST ─── */
+.mp-folder-browser {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.mp-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--bg-surface-2);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: background 0.2s;
+}
+
+.mp-folder-header:hover {
+  background: var(--bg-surface-3);
+}
+
+.mp-folder-arrow {
+  font-size: 8px;
+  transition: transform 0.2s;
+}
+
+.mp-folder-arrow.open {
+  transform: rotate(90deg);
+}
+
+.mp-folder-name {
+  flex: 1;
+}
+
+.mp-folder-count {
+  font-size: 8px;
+  color: var(--text-muted);
+  background: var(--bg-cream);
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+
+.mp-folder-files {
+  display: none;
+  padding-left: 4px;
+  margin-bottom: 4px;
+}
+
+.mp-folder-files.open {
+  display: block;
+}
+
+.mp-folder-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 9px;
+  transition: background 0.2s;
+}
+
+.mp-folder-file:hover {
+  background: var(--bg-surface);
+}
+
+.mp-folder-file.active {
+  background: rgba(205, 185, 234, 0.3);
+}
+
+.mp-folder-file-icon {
+  width: 12px;
+  text-align: center;
+  font-size: 9px;
+}
+
+.mp-folder-file-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.mp-folder-file-size {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+/* ─── YOUTUBE PLAYER ─── */
+.youtube-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.youtube-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bg-surface-3);
+  background: var(--bg-cream);
+  color: var(--text-primary);
+  font-size: 10px;
+  outline: none;
+}
+
+.youtube-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.youtube-play-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent-blue);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.youtube-play-btn:hover {
+  background: var(--accent-purple);
+}
+
+/* ─── FOLDER BROWSER (Full width) ─── */
+.folder-browser {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.folder-item:hover {
+  background: var(--bg-surface-2);
+}
+
+.folder-item-icon {
+  font-size: 14px;
+}
+
+.folder-item-name {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.folder-item-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-surface-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ─── SCAN STATUS ─── */
+.scan-status {
+  padding: 6px 10px;
+  background: var(--bg-surface-2);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 9px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scan-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--bg-surface-3);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── HUD OVERLAY (Spatial UI) ─── */
+.hud-overlay {
+  position: fixed;
+  top: 56px;
+  right: 16px;
+  background: var(--hud-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--hud-text);
+  z-index: 50;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hud-item-label {
+  opacity: 0.6;
+  font-size: 9px;
+}
+
+.hud-item-value {
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* ─── ZONE GROUP HEADER ─── */
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--bg-surface-3);
+}
+
+.group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.group-badge {
+  background: var(--green);
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ─── CONTROL SECTIONS ─── */
+.control-section {
+  margin-bottom: 14px;
+}
+
+.control-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--bg-surface-3);
+  background: var(--bg-cream);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+.btn-primary:hover {
+  background: var(--accent-purple);
+  border-color: var(--accent-purple);
+  color: white;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface-3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── UTILITY ─── */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-4 { gap: 4px; }
+.gap-8 { gap: 8px; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.text-muted { color: var(--text-muted); }
+.text-xs { font-size: 9px; }
+.text-sm { font-size: 11px; }
+.text-lg { font-size: 14px; }
+.font-bold { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ═══ TOPBAR (HUD) ═══ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">Hotel<span>MP3</span></div>
+    <div class="topbar-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="hud-latency" id="hudLatency">-- ms</div>
+    <button class="topbar-btn" onclick="allPower(true)">All On</button>
+    <button class="topbar-btn" onclick="allPower(false)">All Off</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN LAYOUT ═══ -->
+<div class="main-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Zones</div>
+    </div>
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" onclick="switchTab('zones')">Zones</div>
+      <div class="sidebar-tab" onclick="switchTab('media')">Media</div>
+      <div class="sidebar-tab" onclick="switchTab('youtube')">YouTube</div>
+    </div>
+    <div class="sidebar-body">
+      <!-- Zones Panel -->
+      <div class="tab-panel active" id="tab-zones">
+        <div id="zoneList"></div>
+      </div>
+      <!-- Media Panel -->
+      <div class="tab-panel" id="tab-media">
+        <div class="scan-status" id="scanStatus">Scanning...</div>
+        <div class="folder-browser" id="folderBrowser"></div>
+      </div>
+      <!-- YouTube Panel -->
+      <div class="tab-panel" id="tab-youtube">
+        <div class="youtube-input-row">
+          <input type="text" class="youtube-input" id="ytInput" placeholder="Paste YouTube URL or Video ID">
+          <button class="youtube-play-btn" onclick="playYoutube()">▶ Play</button>
+        </div>
+        <div id="ytInfo" style="font-size:10px;color:var(--text-muted);padding:4px 0;"></div>
+        <div style="font-size:9px;color:var(--text-muted);opacity:0.7;">Plays YouTube videos directly on your PC via yt-dlp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="mainContent">
+    <div id="zoneDetail"></div>
+  </div>
+</div>
+
+<!-- ═══ HUD OVERLAY ═══ -->
+<div class="hud-overlay" id="hudOverlay" style="display:none;">
+  <div class="hud-item">
+    <span class="hud-item-label">Zone:</span>
+    <span class="hud-item-value" id="hudZone">--</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-item-label">Source:</span>
+    <span class="hud-item-value" id="hudSource">--</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-item-label">Vol:</span>
+    <span class="hud-item-value" id="hudVol">--</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// HOTELMP3 — Frontend Application
+// Spatial UI + HUD Architecture with Real-time WebSocket Sync
+// ═══════════════════════════════════════════════════════════════
+
+let state = { zones: {}, sources: {}, group_names: {} };
+let selectedZone = null;
+let currentTab = 'zones';
+let mediaSource = 'local';
+let currentPlaylist = [];
+let currentTrackIdx = -1;
+let currentPlayer = null;
+let ws = null;
+let wsReconnectTimer = null;
+
+// ─── WebSocket Connection ───
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(proto + '//' + location.host + '/ws');
+  
+  ws.onopen = function() {
+    document.getElementById('statusDot').className = 'status-dot connected';
+    document.getElementById('statusText').textContent = 'Connected';
+    clearTimeout(wsReconnectTimer);
+  };
+  
+  ws.onmessage = function(e) {
+    try {
+      const msg = JSON.parse(e.data);
+      handleWSMessage(msg);
+    } catch(err) { console.error('WS parse error:', err); }
+  };
+  
+  ws.onclose = function() {
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = 'Reconnecting...';
+    wsReconnectTimer = setTimeout(connectWS, 2000);
+  };
+  
+  ws.onerror = function() { ws.close(); };
+}
+
+function handleWSMessage(msg) {
+  switch(msg.type) {
+    case 'full_state':
+      state = { ...state, ...msg };
+      renderAll();
+      break;
+    case 'zone_update':
+      if (state.zones) {
+        state.zones[msg.zone.id] = msg.zone;
+        renderZoneList();
+        if (selectedZone === msg.zone.id) renderZoneDetail(msg.zone);
+        updateHUD(msg.zone);
+      }
+      break;
+    case 'media_scan_started':
+      document.getElementById('scanStatus').innerHTML = '<div class="scan-spinner"></div> Scanning...';
+      break;
+    case 'media_scan_progress':
+      document.getElementById('scanStatus').innerHTML = `<div class="scan-spinner"></div> Scanned ${msg.folder}: ${msg.count} files`;
+      break;
+    case 'media_scan_complete':
+      document.getElementById('scanStatus').textContent = `Found ${msg.total} files in ${msg.folders} folders`;
+      loadMediaGrouped();
+      break;
+    case 'groups_changed':
+      break;
+  }
+}
+
+function sendWS(data) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data));
+}
+
+// ─── Render Functions ───
+function renderAll() {
+  renderZoneList();
+  if (selectedZone && state.zones[selectedZone]) {
+    renderZoneDetail(state.zones[selectedZone]);
+  } else {
+    // Select first zone
+    const zoneIds = Object.keys(state.zones || {});
+    if (zoneIds.length > 0) {
+      selectedZone = zoneIds[0];
+      renderZoneDetail(state.zones[selectedZone]);
+    }
+  }
+  loadMediaGrouped();
+}
+
+function renderZoneList() {
+  const container = document.getElementById('zoneList');
+  if (!state.zones) { container.innerHTML = ''; return; }
+  
+  // Group zones
+  const groups = {};
+  const ungrouped = [];
+  for (const [id, z] of Object.entries(state.zones)) {
+    if (z.group) {
+      if (!groups[z.group]) groups[z.group] = [];
+      groups[z.group].push(z);
+    } else {
+      ungrouped.push(z);
+    }
+  }
+  
+  let html = '';
+  
+  // Render groups
+  for (const [gid, zones] of Object.entries(groups)) {
+    const groupName = (state.group_names && state.group_names[gid]) || ('Group ' + gid);
+    html += `<div class="group-header">
+      <span class="group-badge">${gid}</span>
+      <span class="group-label">${groupName}</span>
+    </div>`;
+    for (const z of zones) {
+      html += renderZoneCard(z);
+    }
+  }
+  
+  // Render ungrouped
+  if (ungrouped.length > 0) {
+    if (Object.keys(groups).length > 0) {
+      html += `<div class="group-header"><span class="group-label">Individual Zones</span></div>`;
+    }
+    for (const z of ungrouped) {
+      html += renderZoneCard(z);
+    }
+  }
+  
+  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No zones found</div>';
+}
+
+function renderZoneCard(z) {
+  const isSelected = selectedZone === z.id;
+  const powerClass = z.power ? 'on' : 'off';
+  const sourceName = (state.sources && state.sources[z.source_id]) ? state.sources[z.source_id].name : z.source_id;
+  
+  return `<div class="zone-card ${powerClass} ${isSelected ? 'selected' : ''}" onclick="selectZone('${z.id}')">
+    <div class="zone-card-header">
+      <span class="zone-name">${z.name}</span>
+      <span class="zone-type">${z.power ? 'ON' : 'OFF'}</span>
+    </div>
+    <div class="zone-source">📺 ${sourceName}</div>
+    <div class="zone-volume">
+      <div class="vol-bar"><div class="vol-fill" style="width:${z.audio_volume}%"></div></div>
+      <span class="vol-num">${z.audio_volume}%</span>
+    </div>
+  </div>`;
+}
+
+function renderZoneDetail(zone) {
+  if (!zone) { document.getElementById('zoneDetail').innerHTML = ''; return; }
+  
+  const sourceName = (state.sources && state.sources[zone.source_id]) ? state.sources[zone.source_id].name : zone.source_id;
+  
+  let sourcesHtml = '';
+  if (state.sources) {
+    for (const [sid, src] of Object.entries(state.sources)) {
+      const active = zone.source_id === sid ? 'active' : '';
+      sourcesHtml += `<div class="source-option ${active}" onclick="setSource('${zone.id}','${sid}')">
+        <span class="source-icon">${src.icon}</span>
+        <span class="source-name">${src.name}</span>
+      </div>`;
+    }
+  }
+  
+  document.getElementById('zoneDetail').innerHTML = `
+    <div class="zone-detail">
+      <div class="zone-detail-header">
+        <div>
+          <div class="zone-detail-title">${zone.name}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${zone.type.replace('_',' ')} • ${sourceName}</div>
+        </div>
+      </div>
+      
+      <div class="power-row">
+        <span class="power-label">Power</span>
+        <div class="toggle-switch ${zone.power ? 'on' : ''}" onclick="togglePower('${zone.id}')"></div>
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">Source</div>
+        <div class="source-grid">${sourcesHtml}</div>
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">Audio</div>
+        <div class="mixer-section">
+          <div class="eq-row">
+            <span class="eq-label">Bass</span>
+            <input type="range" class="eq-slider" min="-10" max="10" value="${zone.eq_bass}" onchange="setEQ('${zone.id}','bass',this.value)">
+            <span class="eq-val">${zone.eq_bass}</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Mid</span>
+            <input type="range" class="eq-slider" min="-10" max="10" value="${zone.eq_mid}" onchange="setEQ('${zone.id}','mid',this.value)">
+            <span class="eq-val">${zone.eq_mid}</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Treble</span>
+            <input type="range" class="eq-slider" min="-10" max="10" value="${zone.eq_treble}" onchange="setEQ('${zone.id}','treble',this.value)">
+            <span class="eq-val">${zone.eq_treble}</span>
+          </div>
+          <div class="eq-row">
+            <span class="eq-label">Vol</span>
+            <input type="range" class="eq-slider" min="0" max="100" value="${zone.audio_volume}" onchange="setVolume('${zone.id}',this.value)">
+            <span class="eq-val">${zone.audio_volume}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  updateHUD(zone);
+}
+
+function updateHUD(zone) {
+  if (!zone) return;
+  document.getElementById('hudOverlay').style.display = 'flex';
+  document.getElementById('hudZone').textContent = zone.name;
+  const src = (state.sources && state.sources[zone.source_id]) ? state.sources[zone.source_id].name : zone.source_id;
+  document.getElementById('hudSource').textContent = src;
+  document.getElementById('hudVol').textContent = zone.audio_volume + '%';
+}
+
+// ─── Zone Actions ───
+function selectZone(id) {
+  selectedZone = id;
+  renderZoneList();
+  if (state.zones[id]) renderZoneDetail(state.zones[id]);
+}
+
+function togglePower(id) {
+  const zone = state.zones[id];
+  if (!zone) return;
+  sendWS({ type: 'update_zone', zone_id: id, update: { power: !zone.power } });
+}
+
+function setSource(id, sourceId) {
+  sendWS({ type: 'update_zone', zone_id: id, update: { source_id: sourceId } });
+}
+
+function setVolume(id, val) {
+  sendWS({ type: 'update_zone', zone_id: id, update: { audio_volume: parseInt(val) } });
+}
+
+function setEQ(id, band, val) {
+  const update = {};
+  update['eq_' + band] = parseInt(val);
+  sendWS({ type: 'update_zone', zone_id: id, update });
+}
+
+function allPower(on) {
+  fetch('/api/all/power?power=' + on, { method: 'POST' });
+}
+
+// ─── Tab Switching ───
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.sidebar-tab').forEach((el, i) => {
+    el.classList.toggle('active', (tab === 'zones' && i === 0) || (tab === 'media' && i === 1) || (tab === 'youtube' && i === 2));
+  });
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  
+  if (tab === 'media') loadMediaGrouped();
+}
+
+// ─── Media Functions ───
+function loadMediaGrouped() {
+  fetch('/api/media/scan-grouped').then(r => r.json()).then(data => {
+    if (data.scanning) {
+      document.getElementById('scanStatus').innerHTML = '<div class="scan-spinner"></div> Scanning...';
+      return;
+    }
+    renderFolderBrowser(data);
+  }).catch(() => {
+    document.getElementById('scanStatus').textContent = 'Media scan failed';
+  });
+}
+
+function renderFolderBrowser(data) {
+  const container = document.getElementById('folderBrowser');
+  let html = '';
+  
+  if (data.folders) {
+    for (const [name, folder] of Object.entries(data.folders)) {
+      html += `<div class="folder-item" onclick="toggleFolderBrowser(this)">
+        <span class="folder-item-icon">📁</span>
+        <span class="folder-item-name">${name}</span>
+        <span class="folder-item-badge">${folder.count} files</span>
+      </div>`;
+      html += `<div class="mp-folder-files" id="folder-${name}">`;
+      if (folder.files) {
+        for (const f of folder.files) {
+          const icon = f.type === 'video' ? '🎬' : '🎵';
+          html += `<div class="mp-folder-file" onclick="playMediaFile('${f.name.replace(/'/g,"\\'")}','${f.path.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${f.ext.replace(/'/g,"\\'")}','${f.size_human.replace(/'/g,"\\'")}', '${f.type}')">
+            <span class="mp-folder-file-icon">${icon}</span>
+            <span class="mp-folder-file-name">${f.name}</span>
+            <span class="mp-folder-file-size">${f.size_human}</span>
+          </div>`;
+        }
+      }
+      html += '</div>';
+    }
+  }
+  
+  if (data.total !== undefined) {
+    html = `<div class="scan-status">${data.total} media files</div>` + html;
+  }
+  
+  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No media files found</div>';
+}
+
+function toggleFolderBrowser(el) {
+  const files = el.nextElementSibling;
+  files.classList.toggle('open');
+  const icon = el.querySelector('.mp-folder-arrow');
+  if (icon) icon.classList.toggle('open');
+}
+
+function playMediaFile(name, path, ext, sizeHuman, type) {
+  const decodedPath = path.replace(/\\\\/g, '\\');
+  const isVideo = type === 'video';
+  const fileUrl = '/api/media/play?path=' + encodeURIComponent(decodedPath);
+  
+  // Build playlist from visible files
+  currentPlaylist = [];
+  document.querySelectorAll('.mp-folder-file').forEach(el => {
+    const onclick = el.getAttribute('onclick') || '';
+    const match = onclick.match(/playMediaFile\('([^']+)','([^']*)','([^']*)','([^']*)',\s*'([^']*)'\)/);
+    if (match) {
+      currentPlaylist.push({ name: match[1], path: match[2], ext: match[3], size_human: match[4], type: match[5] });
+    }
+  });
+  currentTrackIdx = -1;
+  for (let i = 0; i < currentPlaylist.length; i++) {
+    if (currentPlaylist[i].path === decodedPath) { currentTrackIdx = i; break; }
+  }
+  if (currentTrackIdx < 0) {
+    currentPlaylist.unshift({ name, path: decodedPath, ext, size_human, sizeHuman, type });
+    currentTrackIdx = 0;
+  }
+  
+  const container = document.getElementById('mediaPlayerContainer') || createMediaPlayer();
+  createMediaPlayerElement(type, fileUrl);
+  
+  // Update document title
+  document.title = name + ' — HotelMP3';
+  
+  // Sync to selected zone
+  if (selectedZone) {
+    sendWS({
+      type: 'update_zone', zone_id: selectedZone,
+      update: { media_source: 'local', media_playing: true, media_playlist: currentPlaylist, media_current_idx: currentTrackIdx }
+    });
+  }
+  
+  // Highlight active file
+  document.querySelectorAll('.mp-folder-file').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function createMediaPlayer() {
+  // Add media player to main content if not present
+  const detail = document.getElementById('zoneDetail');
+  if (!document.getElementById('mediaPlayerSection')) {
+    const section = document.createElement('div');
+    section.id = 'mediaPlayerSection';
+    section.innerHTML = `
+      <div class="media-player">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;">Now Playing</span>
+        </div>
+        <div class="mp-player-container" id="mediaPlayerContainer">
+          <span style="color:var(--text-muted);font-size:11px;">Select a file to play</span>
+        </div>
+        <div class="mp-now-playing" id="mpNowPlaying">
+          <div class="mp-track-info">
+            <div class="mp-track-name">No track selected</div>
+            <div class="mp-track-meta">Ready</div>
+          </div>
+        </div>
+        <div class="mp-progress">
+          <span class="mp-time" id="mpCurTime">0:00</span>
+          <div class="mp-progress-bar" onclick="seekMedia(event)"><div class="mp-progress-fill" id="mpProgressFill" style="width:0%"></div></div>
+          <span class="mp-time" id="mpTotalTime">0:00</span>
+        </div>
+        <div class="mp-controls">
+          <div class="mp-btn" onclick="mediaPrev()">⏮</div>
+          <div class="mp-btn play" id="mpPlayBtn" onclick="mediaTogglePlay()">▶</div>
+          <div class="mp-btn" onclick="mediaStop()">⏹</div>
+          <div class="mp-btn" onclick="mediaNext()">⏭</div>
+        </div>
+        <div class="mixer-section" style="margin-top:10px;padding:8px;">
+          <div class="eq-row">
+            <span class="eq-label">Vol</span>
+            <input type="range" class="eq-slider" min="0" max="100" value="80" oninput="setPlayerVolume(this.value)">
+            <span class="eq-val" id="mpVolVal">80%</span>
+          </div>
+        </div>
+      </div>
+    `;
+    detail.insertBefore(section, detail.firstChild);
+  }
+  return document.getElementById('mediaPlayerContainer');
+}
+
+function createMediaPlayerElement(type, src) {
+  const container = document.getElementById('mediaPlayerContainer');
+  stopMediaPlayer();
+  
+  const el = document.createElement(type === 'video' ? 'video' : 'audio');
+  el.id = 'mpPlayer';
+  el.controls = false;
+  el.autoplay = true;
+  el.preload = 'auto';
+  el.style.width = '100%';
+  el.style.maxHeight = type === 'video' ? '300px' : '60px';
+  el.style.background = '#000';
+  el.style.borderRadius = '6px';
+  el.src = src;
+  
+  container.innerHTML = '';
+  container.appendChild(el);
+  
+  el.addEventListener('loadedmetadata', function() {
+    document.getElementById('mpTotalTime').textContent = formatTime(el.duration);
+  });
+  el.addEventListener('timeupdate', function() {
+    var pct = (el.currentTime / el.duration) * 100 || 0;
+    document.getElementById('mpProgressFill').style.width = pct + '%';
+    document.getElementById('mpCurTime').textContent = formatTime(el.currentTime);
+  });
+  el.addEventListener('play', function() { document.getElementById('mpPlayBtn').innerHTML = '⏸'; });
+  el.addEventListener('pause', function() { document.getElementById('mpPlayBtn').innerHTML = '▶'; });
+  el.addEventListener('ended', function() { mediaNext(); });
+  el.addEventListener('error', function() {
+    document.querySelector('.mp-track-meta').textContent = 'Error loading file';
+  });
+  
+  el.volume = 0.8;
+  currentPlayer = el;
+}
+
+function stopMediaPlayer() {
+  if (currentPlayer) {
+    try { currentPlayer.pause(); currentPlayer.src = ''; } catch(e) {}
+    currentPlayer = null;
+  }
+}
+
+function mediaTogglePlay() {
+  if (!currentPlayer) return;
+  if (currentPlayer.paused) currentPlayer.play(); else currentPlayer.pause();
+}
+
+function mediaStop() {
+  if (!currentPlayer) return;
+  currentPlayer.pause(); currentPlayer.currentTime = 0;
+  document.getElementById('mpProgressFill').style.width = '0%';
+  document.getElementById('mpCurTime').textContent = '0:00';
+  document.getElementById('mpPlayBtn').innerHTML = '▶';
+}
+
+function mediaNext() {
+  if (currentPlaylist.length === 0) return;
+  currentTrackIdx = (currentTrackIdx + 1) % currentPlaylist.length;
+  playTrackAtIndex(currentTrackIdx);
+}
+
+function mediaPrev() {
+  if (currentPlaylist.length === 0) return;
+  currentTrackIdx = (currentTrackIdx - 1 + currentPlaylist.length) % currentPlaylist.length;
+  playTrackAtIndex(currentTrackIdx);
+}
+
+function playTrackAtIndex(idx) {
+  if (idx < 0 || idx >= currentPlaylist.length) return;
+  const track = currentPlaylist[idx];
+  playMediaFile(track.name, track.path, track.ext, track.size_human, track.type);
+}
+
+function seekMedia(e) {
+  if (!currentPlayer || !currentPlayer.duration) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - r.left) / r.width;
+  currentPlayer.currentTime = pct * currentPlayer.duration;
+}
+
+function setPlayerVolume(val) {
+  if (currentPlayer) currentPlayer.volume = val / 100;
+  document.getElementById('mpVolVal').textContent = val + '%';
+}
+
+function formatTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+// ─── YouTube Functions ───
+function extractYoutubeId(input) {
+  const m = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input.trim())) return input.trim();
+  return null;
+}
+
+function playYoutube() {
+  const input = document.getElementById('ytInput').value.trim();
+  if (!input) return;
+  const vid = extractYoutubeId(input);
+  if (!vid) { alert('Invalid YouTube URL or Video ID'); return; }
+  
+  // Get video info
+  fetch('/api/youtube/info?id=' + vid).then(r => r.json()).then(info => {
+    document.getElementById('ytInfo').textContent = info.title || ('YouTube: ' + vid);
+  });
+  
+  // Play in media player
+  const container = document.getElementById('mediaPlayerContainer') || createMediaPlayer();
+  stopMediaPlayer();
+  
+  const streamUrl = '/api/youtube/direct?id=' + vid;
+  const videoEl = document.createElement('video');
+  videoEl.id = 'mpPlayer';
+  videoEl.controls = false;
+  videoEl.autoplay = true;
+  videoEl.preload = 'auto';
+  videoEl.style.width = '100%';
+  videoEl.style.maxHeight = '300px';
+  videoEl.style.background = '#000';
+  videoEl.style.borderRadius = '6px';
+  videoEl.src = streamUrl;
+  
+  container.innerHTML = '';
+  container.appendChild(videoEl);
+  
+  videoEl.addEventListener('loadedmetadata', function() {
+    document.getElementById('mpTotalTime').textContent = formatTime(videoEl.duration);
+    document.querySelector('.mp-track-name').textContent = 'YouTube Video';
+    document.querySelector('.mp-track-meta').textContent = 'Streaming via yt-dlp';
+  });
+  videoEl.addEventListener('timeupdate', function() {
+    var pct = (videoEl.currentTime / videoEl.duration) * 100 || 0;
+    document.getElementById('mpProgressFill').style.width = pct + '%';
+    document.getElementById('mpCurTime').textContent = formatTime(videoEl.currentTime);
+  });
+  videoEl.addEventListener('play', function() { document.getElementById('mpPlayBtn').innerHTML = '⏸'; });
+  videoEl.addEventListener('pause', function() { document.getElementById('mpPlayBtn').innerHTML = '▶'; });
+  videoEl.addEventListener('error', function() {
+    container.innerHTML = '<span style="color:#d9534f;font-size:11px;padding:20px;">YouTube stream failed. Ensure yt-dlp is installed.</span>';
+  });
+  
+  videoEl.volume = 0.8;
+  currentPlayer = videoEl;
+  
+  document.title = 'YouTube — HotelMP3';
+}
+
+// ─── Initialize ───
+document.addEventListener('DOMContentLoaded', function() {
+  connectWS);
+  setTimeout(connectWS, 100);
+  
+  // Start media scan on load
+  fetch('/api/media/refresh', { method: 'GET' });
+});
+</script>
+</body>
+</html>

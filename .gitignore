@@ -1,0 +1,24 @@
+# Binaries
+HotelMp3.exe
+*.exe
+
+# Go
+vendor/
+
+# Temp/scratch JS files
+static/_*.js
+static/check*.js
+static/build*.js
+static/fix*.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Resource binaries (keep images/docs)
+Resource/slides/*.png
+Resource/slides/*.jpg

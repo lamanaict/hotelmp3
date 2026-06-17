@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AV Room Control</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface-2: #1f2937;
+  --border: #1e293b;
+  --text: #f1f5f9;
+  --text-dim: #94a3b8;
+  --blue: #2563eb;
+  --green: #059669;
+  --red: #dc2626;
+  --orange: #ea580c;
+  --cyan: #06b6d4;
+  --violet: #7c3aed;
+  --amber: #f59e0b;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overscroll-behavior: none;
+}
+
+/* HEADER */
+.header {
+  padding: 14px 20px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-room {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+.header-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+.conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  transition: background 0.3s;
+}
+.conn-dot.on { background: var(--green); }
+.conn-dot.off { background: var(--red); }
+
+/* CONTENT */
+.content { padding: 16px; max-width: 480px; margin: 0 auto; }
+
+/* POWER BUTTON */
+.power-section {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 32px;
+}
+.power-btn {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 3px solid var(--surface-2);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 40px;
+  color: var(--text-dim);
+}
+.power-btn.on {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(5,150,105,0.08);
+  box-shadow: 0 0 30px rgba(5,150,105,0.2);
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* SOURCE GRID */
+.sources-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.source-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.source-btn:active { transform: scale(0.96); }
+.source-btn.active {
+  border-color: var(--blue);
+  background: rgba(37,99,235,0.12);
+}
+.source-btn-icon { font-size: 24px; }
+.source-btn-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.3;
+}
+.source-btn.active .source-btn-name { color: var(--text); }
+
+/* SLIDER */
+.slider-wrap { padding: 4px 0; }
+.slider-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.slider-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.slider-val { font-size: 16px; font-weight: 800; color: var(--cyan); }
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--cyan);
+  cursor: pointer;
+  border: 3px solid var(--surface);
+  box-shadow: 0 2px 8px rgba(6,182,212,0.4);
+}
+
+/* TOGGLE ROW */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.toggle-label { font-size: 12px; font-weight: 600; color: var(--text); font-size: 12px; }
+.toggle {
+  width: 50px; height: 28px;
+  background: var(--surface-2);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+.toggle.on::after { transform: translateX(22px); }
+
+/* MUTE BTN */
+.mute-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mute-btn.muted { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* STATUS BAR */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.status-dot-icon {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--surface-2);
+}
+.status-dot-icon.on { background: var(--green); box-shadow: 0 0 6px rgba(5,150,105,0.4); }
+.status-text { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+.status-source { font-size: 11px; font-weight: 700; color: var(--text); margin-left: auto; }
+
+/* SYNC BANNER */
+.sync-banner {
+  background: rgba(5,150,105,0.1);
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* ROOM SELECTOR (when no room param) */
+.room-grid { display: flex; flex-direction: column; gap: 8px; }
+.room-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+.room-link:active { border-color: var(--blue); background: rgba(37,99,235,0.06); }
+.room-link-icon { font-size: 28px; }
+.room-link-name { font-size: 14px; font-weight: 700; }
+.room-link-src { font-size: 10px; color: var(--text-dim); }
+.room-link-arrow { margin-left: auto; font-size: 18px; color: var(--border); }
+
+/* ALL ROOMS POWER */
+.all-power-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+.all-power-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.all-power-btn:active { transform: scale(0.97); }
+.all-power-btn.on { border-color: var(--green); color: var(--green); background: rgba(5,150,105,0.1); }
+.all-power-btn.off-btn { border-color: var(--red); color: var(--red); background: rgba(220,38,38,0.1); }
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 9px;
+  color: var(--surface-2);
+  letter-spacing: 0.5px;
+}
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div>
+    <div class="header-room" id="headerRoom">Loading...</div>
+    <div class="header-sub" id="headerSub">AV Control System</div>
+  </div>
+  <div class="conn-dot" id="connDot"></div>
+</div>
+
+<div class="content" id="content">
+  <!-- Rendered by JS -->
+</div>
+
+<script>
+const ROOM_ID = new URLSearchParams(location.search).get('room');
+let state = { rooms: {}, sources: {} };
+let ws = null;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onopen = () => { document.getElementById('connDot').className = 'conn-dot on'; };
+  ws.onclose = () => { document.getElementById('connDot').className = 'conn-dot off'; setTimeout(connectWS, 2000); };
+  ws.onmessage = (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.type === 'full_state') {
+      state.rooms = data.rooms || {};
+      state.sources = data.sources || {};
+      state.sync_groups = data.sync_groups || {};
+      render();
+    }
+    if (data.type === 'room_update' && data.room) {
+      state.rooms[data.room.id] = data.room;
+      render();
+    }
+    if (data.type === 'sync_update') {
+      Object.entries(data.rooms).forEach(([id, r]) => state.rooms[id] = r);
+      render();
+    }
+  };
+}
+
+function send(cmd) { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(cmd)); }
+function togglePower(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{power:!r.power}}); }
+function setSrc(id, sid) { send({type:'update_room',room_id:id,update:{source_id:sid}}); }
+function setVol(id, v) { send({type:'update_room',room_id:id,update:{audio_volume:parseInt(v)}}); }
+function toggleMute(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{audio_muted:!r.audio.muted}}); }
+function toggleMic(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{mic_active:!r.audio.mic_active}}); }
+function setMicVol(id, v) { send({type:'update_room',room_id:id,update:{mic_volume:parseInt(v)}}); }
+
+function render() {
+  const content = document.getElementById('content');
+  const rooms = state.rooms;
+  const sources = state.sources;
+
+  // No room selected — show room list
+  if (!ROOM_ID || !rooms[ROOM_ID]) {
+    document.getElementById('headerRoom').textContent = 'AV Control';
+    document.getElementById('headerSub').textContent = 'Select a room to control';
+    content.innerHTML = `
+      <div class="card">
+        <div class="card-title">Rooms</div>
+        <div class="room-grid">
+          ${Object.values(rooms).map(r => {
+            const src = sources[r.source_id];
+            return `<a class="room-link" href="?room=${r.id}">
+              <div class="room-link-icon">${src ? src.icon : '📺'}</div>
+              <div>
+                <div class="room-link-name">${r.name}</div>
+                <div class="room-link-src">${src ? src.name : '—'} · ${r.power ? '● ON' : '○ OFF'}</div>
+              </div>
+              <div class="room-link-arrow">›</div>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="all-power-row">
+        <div class="all-power-btn on" onclick="fetch('/api/all/power?power=true',{method:'POST'})">⏻ All On</div>
+        <div class="all-power-btn off-btn" onclick="fetch('/api/all/power?power=false',{method:'POST'})">⏻ All Off</div>
+      </div>
+    `;
+    return;
+  }
+
+  const room = rooms[ROOM_ID];
+  const src = sources[room.source_id];
+  const isGrouped = !!room.group;
+
+  document.getElementById('headerRoom').textContent = room.name;
+  document.getElementById('headerSub').textContent = src ? src.name : 'AV Control';
+
+  content.innerHTML = `
+    ${isGrouped ? `<div class="sync-banner">🔗 Sync Group ${room.group} — Changes apply to all synced rooms</div>` : ''}
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <div class="status-dot-icon ${room.power ? 'on' : ''}"></div>
+      <div class="status-text">${room.power ? 'Online' : 'Offline'}</div>
+      <div class="status-source">${src ? src.icon + ' ' + src.name : '—'}</div>
+    </div>
+
+    <!-- POWER -->
+    <div class="power-section">
+      <div class="power-btn ${room.power ? 'on' : ''}" onclick="togglePower('${room.id}')">⏻</div>
+    </div>
+
+    <!-- SOURCE -->
+    <div class="card">
+      <div class="card-title">Source Input</div>
+      <div class="sources-grid">
+        ${Object.values(sources).map(s => `
+          <div class="source-btn ${room.source_id === s.id ? 'active' : ''}" onclick="setSrc('${room.id}','${s.id}')">
+            <div class="source-btn-icon">${s.icon}</div>
+            <div class="source-btn-name">${s.name}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- SPEAKER -->
+    <div class="card">
+      <div class="card-title">Speaker Audio (eARC)</div>
+      <div class="slider-wrap">
+        <div class="slider-top">
+          <div class="slider-label">🔊 Volume</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="mute-btn ${room.audio.muted ? 'muted' : ''}" onclick="toggleMute('${room.id}')">${room.audio.muted ? '🔇' : '🔊'}</button>
+            <div class="slider-val">${room.audio.volume}%</div>
+          </div>
+        </div>
+        <input type="range" min="0" max="100" value="${room.audio.volume}" 
+               oninput="setVol('${room.id}',this.value)" onchange="setVol('${room.id}',this.value)">
+      </div>
+    </div>
+
+    <!-- MIC -->
+    <div class="card">
+      <div class="card-title">Microphone</div>
+      <div class="toggle-row">
+        <div class="toggle-label">${room.audio.mic_active ? '🎤 Microphone Active' : '🎤 Microphone Off'}</div>
+        <div class="toggle ${room.audio.mic_active ? 'on' : ''}" onclick="toggleMic('${room.id}')"></div>
+      </div>
+      <div class="slider-wrap" style="margin-top:12px;">
+        <div class="slider-top">
+          <div class="slider-label">🎤 Mic Volume</div>
+          <div class="slider-val">${room.audio.mic_volume}%</div>
+        </div>
+        <input type="range" min="0" max="100" value="${room.audio.mic_volume}" 
+               oninput="setMicVol('${room.id}',this.value)" onchange="setMicVol('${room.id}',this.value)">
+      </div>
+    </div>
+
+    <!-- ALL ROOMS -->
+    <div class="all-power-row">
+      <div class="all-power-btn on" onclick="fetch('/api/all/power?power=true',{method:'POST'})">⏻ All On</div>
+      <div class="all-power-btn off-btn" onclick="fetch('/api/all/power?power=false',{method:'POST'})">⏻ All Off</div>
+    </div>
+
+    <div style="text-align:center;margin-top:12px;">
+      <a href="/phone" style="font-size:11px;color:var(--text-dim);text-decoration:none;">← Back to all rooms</a>
+    </div>
+
+    <div class="footer">AV Control System v1.0</div>
+  `;
+}
+
+connectWS();
+</script>
+</body>
+</html>
