@@ -320,6 +320,89 @@ body {
   text-align: right;
 }
 
+/* ─── CHANNEL GRID (Dashboard Sidebar) ─── */
+.channel-grid-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.channel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.channel-row:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+}
+.channel-row.active {
+  background: rgba(234,88,12,0.12);
+  border-color: rgba(234,88,12,0.3);
+}
+.channel-row-num {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-light-dim);
+  min-width: 28px;
+  text-align: center;
+}
+.channel-row.active .channel-row-num {
+  color: #ea580c;
+}
+.channel-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.channel-row-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.channel-row-group {
+  font-size: 8px;
+  color: var(--text-light-dim);
+}
+.channel-row-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.channel-row-status.online { background: var(--green); }
+.channel-row-status.offline { background: var(--red); }
+.channel-group-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-light-dim);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  margin: 0 2px 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.channel-group-chip:hover {
+  color: var(--text-light);
+  background: rgba(255,255,255,0.1);
+}
+.channel-group-chip.active {
+  color: #ea580c;
+  border-color: rgba(234,88,12,0.3);
+  background: rgba(234,88,12,0.12);
+}
+
 /* ─── MAIN CONTENT AREA ─── */
 .main-content {
   flex: 1;
@@ -1019,6 +1102,7 @@ body {
     </div>
     <div class="sidebar-tabs">
       <div class="sidebar-tab active" onclick="switchTab('zones')">Zones</div>
+      <div class="sidebar-tab" onclick="switchTab('channels')">Channels</div>
       <div class="sidebar-tab" onclick="switchTab('media')">Media</div>
       <div class="sidebar-tab" onclick="switchTab('youtube')">YouTube</div>
     </div>
@@ -1026,6 +1110,12 @@ body {
       <!-- Zones Panel -->
       <div class="tab-panel active" id="tab-zones">
         <div id="zoneList"></div>
+      </div>
+      <!-- Channels Panel -->
+      <div class="tab-panel" id="tab-channels">
+        <div id="channelLineup" style="font-size:10px;color:var(--text-light-dim);padding:8px 0;">Loading channels...</div>
+        <div id="channelGroupFilter" style="margin-bottom:8px;"></div>
+        <div id="channelGrid" class="channel-grid-dashboard"></div>
       </div>
       <!-- Media Panel -->
       <div class="tab-panel" id="tab-media">
@@ -1123,6 +1213,26 @@ function handleWSMessage(msg) {
         updateHUD(msg.zone);
       }
       break;
+    case 'channel_update':
+      if (state.channels && msg.channel) {
+        state.channels[msg.channel.id] = msg.channel;
+        renderChannelLineup();
+      }
+      break;
+    case 'channel_delete':
+      if (state.channels && msg.channel_id) {
+        delete state.channels[msg.channel_id];
+        renderChannelLineup();
+      }
+      break;
+    case 'lineup_imported':
+      // Refresh full state from server
+      fetch('/api/state').then(function(r) { return r.json(); }).then(function(d) {
+        state.channels = d.channels || {};
+        state.channel_groups = d.channel_groups || {};
+        renderChannelLineup();
+      });
+      break;
     case 'media_scan_started':
       document.getElementById('scanStatus').innerHTML = '<div class="scan-spinner"></div> Scanning...';
       break;
@@ -1156,6 +1266,7 @@ function renderAll() {
     }
   }
   loadMediaGrouped();
+  renderChannelLineup();
 }
 
 function renderZoneList() {
@@ -1204,14 +1315,17 @@ function renderZoneList() {
 function renderZoneCard(z) {
   const isSelected = selectedZone === z.id;
   const powerClass = z.power ? 'on' : 'off';
-  const sourceName = (state.sources && state.sources[z.source_id]) ? state.sources[z.source_id].name : z.source_id;
+  const ch = state.channels ? state.channels[z.source_id] : null;
+  const src = state.sources ? state.sources[z.source_id] : null;
+  const sourceName = ch ? (ch.number + ' — ' + ch.name) : (src ? src.name : z.source_id);
+  const sourceIcon = ch ? '📺' : (src ? src.icon : '📺');
   
   return `<div class="zone-card ${powerClass} ${isSelected ? 'selected' : ''}" onclick="selectZone('${z.id}')">
     <div class="zone-card-header">
       <span class="zone-name">${z.name}</span>
       <span class="zone-type">${z.power ? 'ON' : 'OFF'}</span>
     </div>
-    <div class="zone-source">📺 ${sourceName}</div>
+    <div class="zone-source">${sourceIcon} ${sourceName}</div>
     <div class="zone-volume">
       <div class="vol-bar"><div class="vol-fill" style="width:${z.audio_volume}%"></div></div>
       <span class="vol-num">${z.audio_volume}%</span>
@@ -1329,12 +1443,13 @@ function allPower(on) {
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.sidebar-tab').forEach((el, i) => {
-    el.classList.toggle('active', (tab === 'zones' && i === 0) || (tab === 'media' && i === 1) || (tab === 'youtube' && i === 2));
+    el.classList.toggle('active', (tab === 'zones' && i === 0) || (tab === 'channels' && i === 1) || (tab === 'media' && i === 2) || (tab === 'youtube' && i === 3));
   });
   document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   
   if (tab === 'media') loadMediaGrouped();
+  if (tab === 'channels') renderChannelLineup();
 }
 
 // ─── Media Functions ───
@@ -1629,6 +1744,79 @@ function playYoutube() {
   currentPlayer = videoEl;
   
   document.title = 'YouTube — HotelMP3';
+}
+
+// ─── Channel Functions ───
+let selectedChannelFilter = 'all';
+
+function renderChannelLineup() {
+  const container = document.getElementById('channelGrid');
+  const filterContainer = document.getElementById('channelGroupFilter');
+  const lineupEl = document.getElementById('channelLineup');
+  if (!container || !state.channels) return;
+
+  const channels = Object.values(state.channels);
+  const groups = state.channel_groups || {};
+
+  // Group filter chips
+  let filterHtml = '<span class="channel-group-chip ' + (selectedChannelFilter === 'all' ? 'active' : '') + '" onclick="selectedChannelFilter=\'all\';renderChannelLineup();">All</span>';
+  Object.keys(groups).forEach(function(g) {
+    filterHtml += '<span class="channel-group-chip ' + (selectedChannelFilter === g ? 'active' : '') + '" onclick="selectedChannelFilter=\'' + g + '\';renderChannelLineup();">' + g + '</span>';
+  });
+  if (filterContainer) filterContainer.innerHTML = filterHtml;
+
+  // Filter channels
+  let filtered = channels;
+  if (selectedChannelFilter !== 'all') {
+    filtered = channels.filter(function(c) { return c.group === selectedChannelFilter; });
+  }
+  filtered.sort(function(a, b) { return a.number - b.number; });
+
+  // Selected zone's current channel
+  const selZone = selectedZone ? state.zones[selectedZone] : null;
+  const currentChId = selZone ? selZone.source_id : null;
+
+  // Render channel rows
+  container.innerHTML = filtered.map(function(ch) {
+    const isActive = currentChId === ch.id;
+    const statusClass = ch.status === 'active' ? 'online' : 'offline';
+    return '<div class="channel-row ' + (isActive ? 'active' : '') + '" onclick="tuneZoneToChannel(\'' + ch.id + '\')">' +
+      '<span class="channel-row-num">' + ch.number + '</span>' +
+      '<div class="channel-row-info">' +
+        '<div class="channel-row-name">' + ch.name + '</div>' +
+        '<div class="channel-row-group">' + ch.group + '</div>' +
+      '</div>' +
+      '<span class="channel-row-status ' + statusClass + '"></span>' +
+    '</div>';
+  }).join('');
+
+  if (lineupEl) {
+    lineupEl.textContent = filtered.length + ' channels' + (selectedChannelFilter !== 'all' ? ' in ' + selectedChannelFilter : '');
+  }
+}
+
+function tuneZoneToChannel(channelId) {
+  if (!selectedZone) {
+    alert('Select a zone first');
+    return;
+  }
+  const ch = state.channels[channelId];
+  if (!ch) return;
+
+  // Add channel to sources
+  if (!state.sources[channelId]) {
+    state.sources[channelId] = {id: channelId, name: ch.name, icon: '📺', color: '#ea580c'};
+  }
+
+  // Update zone
+  sendWS({type: 'update_zone', zone_id: selectedZone, update: {source_id: channelId, power: true}});
+
+  // Tell server
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/channels/tune?zone=' + selectedZone + '&channel=' + channelId);
+  xhr.send();
+
+  renderChannelLineup();
 }
 
 // ─── Initialize ───

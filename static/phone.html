@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AV Room Control</title>
+<title>HotelMP3 — Room Control</title>
 <style>
 :root {
   --bg: #0a0e1a;
@@ -41,50 +41,54 @@ body {
   top: 0;
   z-index: 10;
 }
-.header-room {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text);
-}
-.header-sub {
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-top: 1px;
-}
-.conn-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  transition: background 0.3s;
-}
+.header-room { font-size: 16px; font-weight: 800; color: var(--text); }
+.header-sub { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+.conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-2); transition: background 0.3s; }
 .conn-dot.on { background: var(--green); }
 .conn-dot.off { background: var(--red); }
 
 /* CONTENT */
 .content { padding: 16px; max-width: 480px; margin: 0 auto; }
 
-/* POWER BUTTON */
-.power-section {
+/* TABS */
+.tabs {
   display: flex;
-  justify-content: center;
-  margin: 24px 0 32px;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
+.tab {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab.active {
+  border-color: var(--blue);
+  background: rgba(37,99,235,0.12);
+  color: var(--text);
+}
+
+/* POWER BUTTON */
+.power-section { display: flex; justify-content: center; margin: 20px 0 28px; }
 .power-btn {
-  width: 120px; height: 120px;
+  width: 100px; height: 100px;
   border-radius: 50%;
   border: 3px solid var(--surface-2);
   background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 40px;
-  color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.3s;
+  font-size: 36px; color: var(--text-dim);
 }
 .power-btn.on {
-  border-color: var(--green);
-  color: var(--green);
+  border-color: var(--green); color: var(--green);
   background: rgba(5,150,105,0.08);
   box-shadow: 0 0 30px rgba(5,150,105,0.2);
 }
@@ -98,169 +102,132 @@ body {
   margin-bottom: 14px;
 }
 .card-title {
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-dim);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
+  font-size: 9px; font-weight: 700; color: var(--text-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;
 }
 
 /* SOURCE GRID */
-.sources-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
+.sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .source-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 10px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  background: var(--surface-2);
-  cursor: pointer;
-  transition: all 0.2s;
-  -webkit-user-select: none;
-  user-select: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 10px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--surface-2);
+  cursor: pointer; transition: all 0.2s;
+  -webkit-user-select: none; user-select: none;
 }
 .source-btn:active { transform: scale(0.96); }
-.source-btn.active {
-  border-color: var(--blue);
-  background: rgba(37,99,235,0.12);
-}
+.source-btn.active { border-color: var(--blue); background: rgba(37,99,235,0.12); }
 .source-btn-icon { font-size: 24px; }
-.source-btn-name {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-dim);
-  text-align: center;
-  line-height: 1.3;
-}
+.source-btn-name { font-size: 9px; font-weight: 600; color: var(--text-dim); text-align: center; line-height: 1.3; }
 .source-btn.active .source-btn-name { color: var(--text); }
 
 /* SLIDER */
 .slider-wrap { padding: 4px 0; }
-.slider-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
+.slider-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .slider-label { font-size: 12px; font-weight: 600; color: var(--text); }
 .slider-val { font-size: 16px; font-weight: 800; color: var(--cyan); }
 input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: var(--surface-2);
-  border-radius: 4px;
-  outline: none;
+  width: 100%; -webkit-appearance: none; appearance: none;
+  height: 6px; background: var(--surface-2); border-radius: 4px; outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--cyan);
-  cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--cyan); cursor: pointer;
   border: 3px solid var(--surface);
   box-shadow: 0 2px 8px rgba(6,182,212,0.4);
 }
 
 /* TOGGLE ROW */
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-.toggle-label { font-size: 12px; font-weight: 600; color: var(--text); font-size: 12px; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+.toggle-label { font-size: 12px; font-weight: 600; color: var(--text); }
 .toggle {
-  width: 50px; height: 28px;
-  background: var(--surface-2);
-  border-radius: 14px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.3s;
-  flex-shrink: 0;
+  width: 50px; height: 28px; background: var(--surface-2);
+  border-radius: 14px; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0;
 }
 .toggle.on { background: var(--green); }
 .toggle::after {
-  content: '';
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 22px; height: 22px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.3s;
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform 0.3s;
 }
 .toggle.on::after { transform: translateX(22px); }
 
 /* MUTE BTN */
 .mute-btn {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-dim);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--surface-2); color: var(--text-dim); font-size: 16px; cursor: pointer; transition: all 0.2s;
 }
 .mute-btn.muted { background: var(--red); border-color: var(--red); color: #fff; }
 
 /* STATUS BAR */
 .status-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 14px;
 }
-.status-dot-icon {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--surface-2);
-}
+.status-dot-icon { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-2); }
 .status-dot-icon.on { background: var(--green); box-shadow: 0 0 6px rgba(5,150,105,0.4); }
 .status-text { font-size: 11px; font-weight: 600; color: var(--text-dim); }
 .status-source { font-size: 11px; font-weight: 700; color: var(--text); margin-left: auto; }
 
-/* SYNC BANNER */
-.sync-banner {
-  background: rgba(5,150,105,0.1);
-  border: 1px solid var(--green);
-  border-radius: 10px;
-  padding: 10px 14px;
+/* CHANNEL GRID */
+.channel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (min-width: 400px) { .channel-grid { grid-template-columns: repeat(4, 1fr); } }
+.channel-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 6px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  cursor: pointer; transition: all 0.2s;
+  -webkit-user-select: none; user-select: none;
+}
+.channel-card:active { transform: scale(0.95); }
+.channel-card.active { border-color: var(--orange); background: rgba(234,88,12,0.1); }
+.channel-num {
+  font-size: 22px; font-weight: 800; color: var(--text-dim);
+  line-height: 1;
+}
+.channel-card.active .channel-num { color: var(--orange); }
+.channel-name { font-size: 9px; font-weight: 600; color: var(--text-dim); text-align: center; line-height: 1.2; }
+.channel-group { font-size: 8px; color: var(--surface-2); }
+.channel-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: contain; margin-bottom: 2px; }
+
+/* CHANNEL PLAYER */
+.player-container {
+  position: relative; background: #000; border-radius: 12px; overflow: hidden;
   margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
+}
+.player-container video { width: 100%; display: block; background: #000; }
+.player-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.4); color: var(--text); font-size: 14px;
   font-weight: 600;
-  color: var(--green);
+}
+.player-channel-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; color: var(--orange);
 }
 
-/* ROOM SELECTOR (when no room param) */
+/* GROUP FILTER */
+.group-filter {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.group-chip {
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-dim); font-size: 10px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.group-chip.active { border-color: var(--orange); background: rgba(234,88,12,0.12); color: var(--orange); }
+
+/* ROOM SELECTOR */
 .room-grid { display: flex; flex-direction: column; gap: 8px; }
 .room-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  text-decoration: none;
-  color: var(--text);
-  transition: border-color 0.2s;
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface);
+  text-decoration: none; color: var(--text); transition: border-color 0.2s;
 }
 .room-link:active { border-color: var(--blue); background: rgba(37,99,235,0.06); }
 .room-link-icon { font-size: 28px; }
@@ -269,36 +236,30 @@ input[type="range"]::-webkit-slider-thumb {
 .room-link-arrow { margin-left: auto; font-size: 18px; color: var(--border); }
 
 /* ALL ROOMS POWER */
-.all-power-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 20px;
-}
+.all-power-row { display: flex; gap: 8px; margin-top: 20px; }
 .all-power-btn {
-  flex: 1;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
+  flex: 1; padding: 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--surface-2);
+  color: var(--text-dim); font-size: 11px; font-weight: 700;
+  cursor: pointer; text-align: center; transition: all 0.2s;
 }
 .all-power-btn:active { transform: scale(0.97); }
 .all-power-btn.on { border-color: var(--green); color: var(--green); background: rgba(5,150,105,0.1); }
 .all-power-btn.off-btn { border-color: var(--red); color: var(--red); background: rgba(220,38,38,0.1); }
 
 /* FOOTER */
-.footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 9px;
-  color: var(--surface-2);
-  letter-spacing: 0.5px;
+.footer { text-align: center; padding: 20px; font-size: 9px; color: var(--surface-2); letter-spacing: 0.5px; }
+
+/* SYNC BANNER */
+.sync-banner {
+  background: rgba(5,150,105,0.1); border: 1px solid var(--green);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; font-weight: 600; color: var(--green);
 }
+
+/* HIDDEN */
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -317,155 +278,337 @@ input[type="range"]::-webkit-slider-thumb {
 
 <script>
 const ROOM_ID = new URLSearchParams(location.search).get('room');
-let state = { rooms: {}, sources: {} };
+let state = { zones: {}, sources: {}, channels: {}, channel_groups: {} };
 let ws = null;
+let currentView = 'channels'; // channels, audio, rooms
+let activeGroup = 'all';
 
 function connectWS() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onopen = () => { document.getElementById('connDot').className = 'conn-dot on'; };
-  ws.onclose = () => { document.getElementById('connDot').className = 'conn-dot off'; setTimeout(connectWS, 2000); };
-  ws.onmessage = (evt) => {
-    const data = JSON.parse(evt.data);
+  ws = new WebSocket(proto + '://' + location.host + '/ws');
+  ws.onopen = function() { document.getElementById('connDot').className = 'conn-dot on'; };
+  ws.onclose = function() { document.getElementById('connDot').className = 'conn-dot off'; setTimeout(connectWS, 2000); };
+  ws.onmessage = function(evt) {
+    var data = JSON.parse(evt.data);
     if (data.type === 'full_state') {
-      state.rooms = data.rooms || {};
+      state.zones = data.zones || {};
       state.sources = data.sources || {};
-      state.sync_groups = data.sync_groups || {};
+      state.channels = data.channels || {};
+      state.channel_groups = data.channel_groups || {};
+      state.group_names = data.group_names || {};
       render();
     }
-    if (data.type === 'room_update' && data.room) {
-      state.rooms[data.room.id] = data.room;
+    if (data.type === 'zone_update' && data.zone) {
+      state.zones[data.zone.id] = data.zone;
       render();
     }
-    if (data.type === 'sync_update') {
-      Object.entries(data.rooms).forEach(([id, r]) => state.rooms[id] = r);
+    if (data.type === 'channel_update' && data.channel) {
+      state.channels[data.channel.id] = data.channel;
       render();
+    }
+    if (data.type === 'lineup_imported') {
+      // Refresh full state
+      fetch('/api/state').then(function(r) { return r.json(); }).then(function(d) {
+        state.channels = d.channels || {};
+        state.channel_groups = d.channel_groups || {};
+        render();
+      });
     }
   };
 }
 
 function send(cmd) { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(cmd)); }
-function togglePower(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{power:!r.power}}); }
-function setSrc(id, sid) { send({type:'update_room',room_id:id,update:{source_id:sid}}); }
-function setVol(id, v) { send({type:'update_room',room_id:id,update:{audio_volume:parseInt(v)}}); }
-function toggleMute(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{audio_muted:!r.audio.muted}}); }
-function toggleMic(id) { const r = state.rooms[id]; if(r) send({type:'update_room',room_id:id,update:{mic_active:!r.audio.mic_active}}); }
-function setMicVol(id, v) { send({type:'update_room',room_id:id,update:{mic_volume:parseInt(v)}}); }
+
+// Zone control helpers
+function togglePower(id) {
+  var r = state.zones[id];
+  if (r) send({type:'update_zone', zone_id:id, update:{power:!r.power}});
+}
+function setSource(id, sid) {
+  send({type:'update_zone', zone_id:id, update:{source_id:sid}});
+}
+function setVolume(id, v) {
+  send({type:'update_zone', zone_id:id, update:{audio_volume:parseInt(v)}});
+}
+function toggleMute(id) {
+  var r = state.zones[id];
+  if (r) send({type:'update_zone', zone_id:id, update:{audio_muted:!r.audio_muted}});
+}
+function toggleMic(id) {
+  var r = state.zones[id];
+  if (r) send({type:'update_zone', zone_id:id, update:{mic_active:!r.mic_active}});
+}
+function setMicVolume(id, v) {
+  send({type:'update_zone', zone_id:id, update:{mic_volume:parseInt(v)}});
+}
+
+// Channel tuning
+function tuneChannel(zoneId, channelId) {
+  var ch = state.channels[channelId];
+  if (!ch) return;
+  
+  // Update source to this channel
+  send({type:'update_zone', zone_id:zoneId, update:{source_id:channelId}});
+  
+  // Also add channel to sources if not present
+  if (!state.sources[channelId]) {
+    state.sources[channelId] = {id: channelId, name: ch.name, icon: '📺', color: '#f59e0b'};
+  }
+  
+  // Power on if off
+  var zone = state.zones[zoneId];
+  if (zone && !zone.power) {
+    send({type:'update_zone', zone_id:zoneId, update:{power:true}});
+  }
+  
+  // Tell server to tune
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/channels/tune?zone=' + zoneId + '&channel=' + channelId);
+  xhr.send();
+}
+
+function playChannelStream(channelId) {
+  var ch = state.channels[channelId];
+  if (!ch || !ch.stream_url) {
+    alert('No stream URL configured for ' + (ch ? ch.name : 'this channel'));
+    return;
+  }
+  currentView = 'player';
+  renderPlayer(ch);
+}
+
+function renderPlayer(ch) {
+  var content = document.getElementById('content');
+  document.getElementById('headerRoom').textContent = ch.name;
+  document.getElementById('headerSub').textContent = 'Channel ' + ch.number;
+  
+  var streamUrl = '/api/channels/stream?id=' + ch.id;
+  
+  content.innerHTML = 
+    '<div class="player-container" id="playerContainer">' +
+      '<video id="chPlayer" autoplay playsinline controls></video>' +
+      '<div class="player-channel-badge">CH ' + ch.number + ' — ' + ch.name + '</div>' +
+      '<div class="player-overlay" id="playerOverlay">Loading stream...</div>' +
+    '</div>' +
+    '<div style="text-align:center;margin-bottom:16px;">' +
+      '<button onclick="currentView=\'channels\';render();" style="padding:10px 24px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;">← Back to Channels</button>' +
+    '</div>';
+  
+  // Try HLS.js first, then native
+  var video = document.getElementById('chPlayer');
+  var overlay = document.getElementById('playerOverlay');
+  
+  if (ch.stream_url.indexOf('.m3u8') !== -1 && typeof Hls !== 'undefined') {
+    var hls = new Hls();
+    hls.loadSource(streamUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() { overlay.className = 'player-overlay hidden'; video.play(); });
+    hls.on(Hls.Events.ERROR, function() { overlay.textContent = 'Stream error. Retrying...'; });
+  } else {
+    video.src = streamUrl;
+    video.addEventListener('loadeddata', function() { overlay.className = 'player-overlay hidden'; });
+    video.addEventListener('error', function() { overlay.textContent = 'Stream unavailable. Check stream URL.'; });
+    video.play().catch(function(){});
+  }
+}
 
 function render() {
-  const content = document.getElementById('content');
-  const rooms = state.rooms;
-  const sources = state.sources;
+  var content = document.getElementById('content');
+  var zones = state.zones;
+  var sources = state.sources;
+  var channels = state.channels;
 
   // No room selected — show room list
-  if (!ROOM_ID || !rooms[ROOM_ID]) {
-    document.getElementById('headerRoom').textContent = 'AV Control';
+  if (!ROOM_ID || !zones[ROOM_ID]) {
+    document.getElementById('headerRoom').textContent = 'HotelMP3';
     document.getElementById('headerSub').textContent = 'Select a room to control';
-    content.innerHTML = `
-      <div class="card">
-        <div class="card-title">Rooms</div>
-        <div class="room-grid">
-          ${Object.values(rooms).map(r => {
-            const src = sources[r.source_id];
-            return `<a class="room-link" href="?room=${r.id}">
-              <div class="room-link-icon">${src ? src.icon : '📺'}</div>
-              <div>
-                <div class="room-link-name">${r.name}</div>
-                <div class="room-link-src">${src ? src.name : '—'} · ${r.power ? '● ON' : '○ OFF'}</div>
-              </div>
-              <div class="room-link-arrow">›</div>
-            </a>`;
-          }).join('')}
-        </div>
-      </div>
-      <div class="all-power-row">
-        <div class="all-power-btn on" onclick="fetch('/api/all/power?power=true',{method:'POST'})">⏻ All On</div>
-        <div class="all-power-btn off-btn" onclick="fetch('/api/all/power?power=false',{method:'POST'})">⏻ All Off</div>
-      </div>
-    `;
+    
+    var roomCards = Object.values(zones).map(function(r) {
+      var src = sources[r.source_id];
+      var ch = channels[r.source_id];
+      var displayName = ch ? (ch.number + ' — ' + ch.name) : (src ? src.name : '—');
+      return '<a class="room-link" href="?room=' + r.id + '">' +
+        '<div class="room-link-icon">' + (ch ? '📺' : (src ? src.icon : '📺')) + '</div>' +
+        '<div>' +
+          '<div class="room-link-name">' + r.name + '</div>' +
+          '<div class="room-link-src">' + displayName + ' · ' + (r.power ? '● ON' : '○ OFF') + '</div>' +
+        '</div>' +
+        '<div class="room-link-arrow">›</div>' +
+      '</a>';
+    }).join('');
+    
+    content.innerHTML = 
+      '<div class="card">' +
+        '<div class="card-title">Rooms</div>' +
+        '<div class="room-grid">' + roomCards + '</div>' +
+      '</div>' +
+      '<div class="all-power-row">' +
+        '<div class="all-power-btn on" onclick="fetch(\'/api/all/power?power=true\',{method:\'POST\'})">⏻ All On</div>' +
+        '<div class="all-power-btn off-btn" onclick="fetch(\'/api/all/power?power=false\',{method:\'POST\'})">⏻ All Off</div>' +
+      '</div>' +
+      '<div class="footer">HotelMP3 v2.0 — IPTV Control</div>';
     return;
   }
 
-  const room = rooms[ROOM_ID];
-  const src = sources[room.source_id];
-  const isGrouped = !!room.group;
+  var room = zones[ROOM_ID];
+  var src = sources[room.source_id];
+  var currentCh = channels[room.source_id];
+  var isGrouped = !!room.group;
 
   document.getElementById('headerRoom').textContent = room.name;
-  document.getElementById('headerSub').textContent = src ? src.name : 'AV Control';
+  document.getElementById('headerSub').textContent = currentCh ? (currentCh.number + ' — ' + currentCh.name) : (src ? src.name : 'AV Control');
 
-  content.innerHTML = `
-    ${isGrouped ? `<div class="sync-banner">🔗 Sync Group ${room.group} — Changes apply to all synced rooms</div>` : ''}
+  // If in player view, show player
+  if (currentView === 'player' && currentCh) {
+    renderPlayer(currentCh);
+    return;
+  }
 
-    <!-- STATUS BAR -->
-    <div class="status-bar">
-      <div class="status-dot-icon ${room.power ? 'on' : ''}"></div>
-      <div class="status-text">${room.power ? 'Online' : 'Offline'}</div>
-      <div class="status-source">${src ? src.icon + ' ' + src.name : '—'}</div>
-    </div>
+  // Build tab bar
+  var tabsHtml = 
+    '<div class="tabs">' +
+      '<div class="tab ' + (currentView === 'channels' ? 'active' : '') + '" onclick="currentView=\'channels\';render();">📺 Channels</div>' +
+      '<div class="tab ' + (currentView === 'audio' ? 'active' : '') + '" onclick="currentView=\'audio\';render();">🔊 Audio</div>' +
+    '</div>';
 
-    <!-- POWER -->
-    <div class="power-section">
-      <div class="power-btn ${room.power ? 'on' : ''}" onclick="togglePower('${room.id}')">⏻</div>
-    </div>
+  // ─── CHANNELS VIEW ───
+  if (currentView === 'channels') {
+    // Group filter chips
+    var groups = Object.keys(state.channel_groups || {});
+    var groupChips = '<div class="group-filter">' +
+      '<div class="group-chip ' + (activeGroup === 'all' ? 'active' : '') + '" onclick="activeGroup=\'all\';render();">All</div>';
+    
+    groups.forEach(function(g) {
+      groupChips += '<div class="group-chip ' + (activeGroup === g ? 'active' : '') + '" onclick="activeGroup=\'' + g + '\';render();">' + g + '</div>';
+    });
+    groupChips += '</div>';
 
-    <!-- SOURCE -->
-    <div class="card">
-      <div class="card-title">Source Input</div>
-      <div class="sources-grid">
-        ${Object.values(sources).map(s => `
-          <div class="source-btn ${room.source_id === s.id ? 'active' : ''}" onclick="setSrc('${room.id}','${s.id}')">
-            <div class="source-btn-icon">${s.icon}</div>
-            <div class="source-btn-name">${s.name}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
+    // Channel grid
+    var channelList = Object.values(channels);
+    if (activeGroup !== 'all') {
+      channelList = channelList.filter(function(c) { return c.group === activeGroup; });
+    }
+    channelList.sort(function(a, b) { return a.number - b.number; });
 
-    <!-- SPEAKER -->
-    <div class="card">
-      <div class="card-title">Speaker Audio (eARC)</div>
-      <div class="slider-wrap">
-        <div class="slider-top">
-          <div class="slider-label">🔊 Volume</div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button class="mute-btn ${room.audio.muted ? 'muted' : ''}" onclick="toggleMute('${room.id}')">${room.audio.muted ? '🔇' : '🔊'}</button>
-            <div class="slider-val">${room.audio.volume}%</div>
-          </div>
-        </div>
-        <input type="range" min="0" max="100" value="${room.audio.volume}" 
-               oninput="setVol('${room.id}',this.value)" onchange="setVol('${room.id}',this.value)">
-      </div>
-    </div>
+    var channelCards = channelList.map(function(ch) {
+      var isActive = room.source_id === ch.id;
+      var logoHtml = ch.logo ? 
+        '<img class="channel-logo" src="' + ch.logo + '" alt="' + ch.name + '" onerror="this.style.display=\'none\'">' :
+        '';
+      return '<div class="channel-card ' + (isActive ? 'active' : '') + '" ' +
+        'onclick="tuneChannel(\'' + room.id + '\',\'' + ch.id + '\')">' +
+        logoHtml +
+        '<div class="channel-num">' + ch.number + '</div>' +
+        '<div class="channel-name">' + ch.name + '</div>' +
+        '<div class="channel-group">' + ch.group + '</div>' +
+      '</div>';
+    }).join('');
 
-    <!-- MIC -->
-    <div class="card">
-      <div class="card-title">Microphone</div>
-      <div class="toggle-row">
-        <div class="toggle-label">${room.audio.mic_active ? '🎤 Microphone Active' : '🎤 Microphone Off'}</div>
-        <div class="toggle ${room.audio.mic_active ? 'on' : ''}" onclick="toggleMic('${room.id}')"></div>
-      </div>
-      <div class="slider-wrap" style="margin-top:12px;">
-        <div class="slider-top">
-          <div class="slider-label">🎤 Mic Volume</div>
-          <div class="slider-val">${room.audio.mic_volume}%</div>
-        </div>
-        <input type="range" min="0" max="100" value="${room.audio.mic_volume}" 
-               oninput="setMicVol('${room.id}',this.value)" onchange="setMicVol('${room.id}',this.value)">
-      </div>
-    </div>
+    // Current channel info + stream button
+    var currentChHtml = '';
+    if (currentCh) {
+      currentChHtml = 
+        '<div class="card" style="margin-bottom:14px;">' +
+          '<div class="card-title">Now Playing</div>' +
+          '<div style="display:flex;align-items:center;gap:12px;">' +
+            '<div style="font-size:28px;font-weight:800;color:var(--orange);">' + currentCh.number + '</div>' +
+            '<div>' +
+              '<div style="font-size:13px;font-weight:700;color:var(--text);">' + currentCh.name + '</div>' +
+              '<div style="font-size:10px;color:var(--text-dim);">' + currentCh.group + ' · ' + currentCh.category + '</div>' +
+            '</div>' +
+            (currentCh.stream_url ? 
+              '<button onclick="playChannelStream(\'' + currentCh.id + '\')" style="margin-left:auto;padding:8px 16px;border-radius:8px;border:1.5px solid var(--orange);background:rgba(234,88,12,0.12);color:var(--orange);font-size:11px;font-weight:700;cursor:pointer;">▶ Watch</button>' :
+              '<span style="margin-left:auto;font-size:10px;color:var(--text-dim);">No stream URL</span>'
+            ) +
+          '</div>' +
+        '</div>';
+    }
 
-    <!-- ALL ROOMS -->
-    <div class="all-power-row">
-      <div class="all-power-btn on" onclick="fetch('/api/all/power?power=true',{method:'POST'})">⏻ All On</div>
-      <div class="all-power-btn off-btn" onclick="fetch('/api/all/power?power=false',{method:'POST'})">⏻ All Off</div>
-    </div>
+    content.innerHTML = 
+      (isGrouped ? '<div class="sync-banner">🔗 Sync Group ' + room.group + ' — Changes apply to all synced rooms</div>' : '') +
+      tabsHtml +
+      currentChHtml +
+      groupChips +
+      '<div class="channel-grid">' + channelCards + '</div>' +
+      '<div class="footer">HotelMP3 v2.0 — ' + channelList.length + ' channels</div>';
+    return;
+  }
 
-    <div style="text-align:center;margin-top:12px;">
-      <a href="/phone" style="font-size:11px;color:var(--text-dim);text-decoration:none;">← Back to all rooms</a>
-    </div>
+  // ─── AUDIO VIEW ───
+  if (currentView === 'audio') {
+    // Build source options from both sources and channels
+    var sourceOptions = '';
+    Object.values(sources).forEach(function(s) {
+      var isCh = !!channels[s.id];
+      sourceOptions += '<div class="source-btn ' + (room.source_id === s.id ? 'active' : '') + '" onclick="setSource(\'' + room.id + '\',\'' + s.id + '\')">' +
+        '<div class="source-btn-icon">' + (isCh ? '📺' : s.icon) + '</div>' +
+        '<div class="source-btn-name">' + s.name + '</div>' +
+      '</div>';
+    });
+    // Also add channels as sources
+    Object.values(channels).forEach(function(ch) {
+      if (!sources[ch.id]) {
+        sourceOptions += '<div class="source-btn ' + (room.source_id === ch.id ? 'active' : '') + '" onclick="tuneChannel(\'' + room.id + '\',\'' + ch.id + '\')">' +
+          '<div class="source-btn-icon">📺</div>' +
+          '<div class="source-btn-name">CH' + ch.number + ' ' + ch.name + '</div>' +
+        '</div>';
+      }
+    });
 
-    <div class="footer">AV Control System v1.0</div>
-  `;
+    content.innerHTML = 
+      (isGrouped ? '<div class="sync-banner">🔗 Sync Group ' + room.group + ' — Changes apply to all synced rooms</div>' : '') +
+      tabsHtml +
+      '<div class="status-bar">' +
+        '<div class="status-dot-icon ' + (room.power ? 'on' : '') + '"></div>' +
+        '<div class="status-text">' + (room.power ? 'Online' : 'Offline') + '</div>' +
+        '<div class="status-source">' + (currentCh ? (currentCh.number + ' — ' + currentCh.name) : (src ? src.icon + ' ' + src.name : '—')) + '</div>' +
+      '</div>' +
+      '<div class="power-section">' +
+        '<div class="power-btn ' + (room.power ? 'on' : '') + '" onclick="togglePower(\'' + room.id + '\')">⏻</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-title">Source Input</div>' +
+        '<div class="sources-grid">' + sourceOptions + '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-title">Speaker Audio</div>' +
+        '<div class="slider-wrap">' +
+          '<div class="slider-top">' +
+            '<div class="slider-label">🔊 Volume</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+              '<button class="mute-btn ' + (room.audio_muted ? 'muted' : '') + '" onclick="toggleMute(\'' + room.id + '\')">' + (room.audio_muted ? '🔇' : '🔊') + '</button>' +
+              '<div class="slider-val">' + room.audio_volume + '%</div>' +
+            '</div>' +
+          '</div>' +
+          '<input type="range" min="0" max="100" value="' + room.audio_volume + '" ' +
+            'oninput="setVolume(\'' + room.id + '\',this.value)" onchange="setVolume(\'' + room.id + '\',this.value)">' +
+        '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-title">Microphone</div>' +
+        '<div class="toggle-row">' +
+          '<div class="toggle-label">' + (room.mic_active ? '🎤 Microphone Active' : '🎤 Microphone Off') + '</div>' +
+          '<div class="toggle ' + (room.mic_active ? 'on' : '') + '" onclick="toggleMic(\'' + room.id + '\')"></div>' +
+        '</div>' +
+        '<div class="slider-wrap" style="margin-top:12px;">' +
+          '<div class="slider-top">' +
+            '<div class="slider-label">🎤 Mic Volume</div>' +
+            '<div class="slider-val">' + room.mic_volume + '%</div>' +
+          '</div>' +
+          '<input type="range" min="0" max="100" value="' + room.mic_volume + '" ' +
+            'oninput="setMicVolume(\'' + room.id + '\',this.value)" onchange="setMicVolume(\'' + room.id + '\',this.value)">' +
+        '</div>' +
+      '</div>' +
+      '<div class="all-power-row">' +
+        '<div class="all-power-btn on" onclick="fetch(\'/api/all/power?power=true\',{method:\'POST\'})">⏻ All On</div>' +
+        '<div class="all-power-btn off-btn" onclick="fetch(\'/api/all/power?power=false\',{method:\'POST\'})">⏻ All Off</div>' +
+      '</div>' +
+      '<div style="text-align:center;margin-top:12px;">' +
+        '<a href="/phone" style="font-size:11px;color:var(--text-dim);text-decoration:none;">← Back to all rooms</a>' +
+      '</div>' +
+      '<div class="footer">HotelMP3 v2.0 — AV Control</div>';
+    return;
+  }
 }
 
 connectWS();

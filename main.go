@@ -172,6 +172,8 @@ func (s *AppState) FullState() map[string]interface{} {
 		"zones":              zones,
 		"remote_connections": s.RemoteConnections,
 		"group_names":        s.GroupNames,
+		"channels":           lineup.GetAll(),
+		"channel_groups":     lineup.GetGroups(),
 	}
 }
 
@@ -334,6 +336,9 @@ func main() {
 	}
 
 	state = NewAppState()
+	
+	// Initialize IPTV channel lineup
+	initLineup()
 
 	// Routes
 	mux := http.NewServeMux()
@@ -369,6 +374,12 @@ func main() {
 	mux.HandleFunc("/api/audio/devices", handleAudioDevices)
 	mux.HandleFunc("/api/display/devices", handleDisplayDevices)
 	mux.HandleFunc("/api/cast/", handleCast)
+	// IPTV Channel routes
+	mux.HandleFunc("/api/channels/stream", handleChannelStream)
+	mux.HandleFunc("/api/channels/tune", handleChannelTune)
+	mux.HandleFunc("/api/channels/import", handleM3UImport)
+	mux.HandleFunc("/api/channels/groups", handleChannelGroups)
+	mux.HandleFunc("/api/channels/", handleChannelCRUD)
 	mux.HandleFunc("/ws", handleWebSocket)
 
 	addr := fmt.Sprintf("0.0.0.0:%d", *port)
