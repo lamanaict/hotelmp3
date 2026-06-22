@@ -446,7 +446,7 @@ function render() {
         '<div class="all-power-btn on" onclick="fetch(\'/api/all/power?power=true\',{method:\'POST\'})">⏻ All On</div>' +
         '<div class="all-power-btn off-btn" onclick="fetch(\'/api/all/power?power=false\',{method:\'POST\'})">⏻ All Off</div>' +
       '</div>' +
-      '<div class="footer">HotelMP3 v2.0 — IPTV Control</div>';
+      '<div class="footer"><a href="/settings" style="color:var(--blue);text-decoration:none;">⚙ Settings</a> · HotelMP3 v2.0 — IPTV Control</div>';
     return;
   }
 
@@ -530,7 +530,7 @@ function render() {
       currentChHtml +
       groupChips +
       '<div class="channel-grid">' + channelCards + '</div>' +
-      '<div class="footer">HotelMP3 v2.0 — ' + channelList.length + ' channels</div>';
+      '<div class="footer"><a href="/settings" style="color:var(--blue);text-decoration:none;">⚙ Settings</a> · HotelMP3 v2.0 — ' + channelList.length + ' channels</div>';
     return;
   }
 
@@ -606,7 +606,7 @@ function render() {
       '<div style="text-align:center;margin-top:12px;">' +
         '<a href="/phone" style="font-size:11px;color:var(--text-dim);text-decoration:none;">← Back to all rooms</a>' +
       '</div>' +
-      '<div class="footer">HotelMP3 v2.0 — AV Control</div>';
+      '<div class="footer"><a href="/settings" style="color:var(--blue);text-decoration:none;">⚙ Settings</a> · HotelMP3 v2.0 — AV Control</div>';
     return;
   }
 }

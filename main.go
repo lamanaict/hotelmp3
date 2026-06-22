@@ -339,10 +339,14 @@ func main() {
 	
 	// Initialize IPTV channel lineup
 	initLineup()
+	
+	// Load settings
+	loadSettings()
 
 	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handleIndex)
+	mux.HandleFunc("/settings", handleSettingsPage)
 	mux.HandleFunc("/phone", handlePhone)
 	mux.HandleFunc("/api/state", handleState)
 	mux.HandleFunc("/api/zones/", handleZones)
@@ -364,7 +368,6 @@ func main() {
 	mux.HandleFunc("/api/wifi/scan", handleWiFiScan)
 	mux.HandleFunc("/api/usb", handleUSB)
 	mux.HandleFunc("/api/room-devices", handleRoomDevices)
-	mux.HandleFunc("/api/system/info", handleSystemInfo)
 	mux.HandleFunc("/api/qr/", handleQR)
 	mux.HandleFunc("/api/screen-sources", handleScreenSources)
 	mux.HandleFunc("/api/remote/connect", handleRemoteConnect)
@@ -380,6 +383,14 @@ func main() {
 	mux.HandleFunc("/api/channels/import", handleM3UImport)
 	mux.HandleFunc("/api/channels/groups", handleChannelGroups)
 	mux.HandleFunc("/api/channels/", handleChannelCRUD)
+	// Settings routes (more specific first!)
+	mux.HandleFunc("/api/settings/update", handleSettingsUpdate)
+	mux.HandleFunc("/api/settings/export", handleSettingsExport)
+	mux.HandleFunc("/api/settings/import", handleSettingsImport)
+	mux.HandleFunc("/api/settings/reset", handleSettingsReset)
+	mux.HandleFunc("/api/settings", handleSettingsGet)
+	mux.HandleFunc("/api/system/info", handleSystemInfo)
+	mux.HandleFunc("/api/timezones", handleTimezones)
 	mux.HandleFunc("/ws", handleWebSocket)
 
 	addr := fmt.Sprintf("0.0.0.0:%d", *port)
@@ -433,6 +444,9 @@ func main() {
 
 // ─── Stub handlers (defined in handlers.go / media.go) ─────────
 
+func handleSettingsPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, filepath.Join(staticDir, "settings.html"))
+}
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" { http.NotFound(w, r); return }
 	http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
@@ -484,14 +498,6 @@ func handleRoomDevices(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	jsonResponse(w, result)
-}
-func handleSystemInfo(w http.ResponseWriter, r *http.Request) {
-	hostname, _ := os.Hostname()
-	localIP := getLocalIP()
-	jsonResponse(w, map[string]interface{}{
-		"hostname": hostname, "local_ip": localIP, "all_ips": getAllLocalIPs(),
-		"port": *port, "os": "windows",
-	})
 }
 func handleQR(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")

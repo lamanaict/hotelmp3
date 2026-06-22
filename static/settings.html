@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelMP3 — Settings</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg2: #0d1220;
+  --surface: #111827;
+  --surface-2: #1a2235;
+  --surface-3: #1e293b;
+  --border: #1e293b;
+  --border-light: #2a3a4e;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --blue: #3b82f6;
+  --blue-dim: #1e40af;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --cyan: #06b6d4;
+  --purple: #8b5cf6;
+  --amber: #f59e0b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── TOP BAR ─── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.topbar-sub { font-size: 10px; color: var(--text-muted); }
+.topbar-actions { display: flex; gap: 8px; }
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { border-color: var(--blue); color: var(--text); }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dim); }
+.btn-danger { border-color: var(--red); color: var(--red); }
+.btn-danger:hover { background: rgba(239,68,68,0.1); }
+.btn-success { border-color: var(--green); color: var(--green); }
+.btn-success:hover { background: rgba(16,185,129,0.1); }
+
+/* ─── LAYOUT ─── */
+.layout { display: flex; min-height: calc(100vh - 53px); }
+
+/* ─── SIDEBAR NAV ─── */
+.sidenav {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
+  overflow-y: auto;
+}
+.sidenav-section { padding: 8px 16px 4px; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+  cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent;
+}
+.nav-item:hover { background: var(--surface-2); color: var(--text); }
+.nav-item.active { background: var(--surface-2); color: var(--text); border-left-color: var(--blue); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* ─── MAIN CONTENT ─── */
+.main { flex: 1; padding: 24px; overflow-y: auto; }
+.section { display: none; }
+.section.active { display: block; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 20px; font-weight: 800; color: var(--text); }
+.section-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ─── FORM GRID ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.form-grid.single { grid-template-columns: 1fr; }
+.form-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-hint { font-size: 10px; color: var(--text-muted); }
+.form-input, .form-select {
+  padding: 10px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2); color: var(--text);
+  font-size: 13px; font-weight: 500;
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--blue); }
+.form-select { cursor: pointer; }
+textarea.form-input { resize: vertical; min-height: 60px; }
+
+/* ─── INFO CARDS ─── */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.info-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+}
+.info-card-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.info-card-value { font-size: 14px; font-weight: 700; color: var(--text); word-break: break-all; }
+.info-card-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ─── DEVICE LIST ─── */
+.device-list { display: flex; flex-direction: column; gap: 8px; }
+.device-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  transition: border-color 0.2s;
+}
+.device-item:hover { border-color: var(--border-light); }
+.device-icon { font-size: 20px; width: 32px; text-align: center; }
+.device-info { flex: 1; min-width: 0; }
+.device-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.device-detail { font-size: 10px; color: var(--text-muted); }
+.device-badge {
+  padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.device-badge.active { background: rgba(16,185,129,0.15); color: var(--green); }
+.device-badge.default { background: rgba(59,130,246,0.15); color: var(--blue); }
+.device-badge.offline { background: rgba(239,68,68,0.15); color: var(--red); }
+.device-badge.warning { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+/* ─── TOGGLE ─── */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-info { flex: 1; }
+.toggle-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.toggle-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.toggle {
+  width: 44px; height: 24px; background: var(--surface-3);
+  border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s;
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* ─── STATUS BAR ─── */
+.status-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 16px; font-size: 11px;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot.green { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+.status-dot.red { background: var(--red); }
+.status-dot.amber { background: var(--amber); }
+
+/* ─── SAVE BAR ─── */
+.save-bar {
+  position: sticky; bottom: 0; padding: 16px 24px;
+  background: var(--surface); border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 -24px -24px;
+}
+.save-status { font-size: 11px; color: var(--text-muted); }
+.save-status.saved { color: var(--green); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sidenav { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .layout { flex-direction: column; }
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/" style="text-decoration:none;color:var(--text-dim);font-size:11px;font-weight:600;">← Dashboard</a>
+    <div>
+      <div class="topbar-title">⚙ Settings</div>
+      <div class="topbar-sub" id="hotelNameSub">HotelMP3 Control System</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn" onclick="exportSettings()">📥 Export</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">📤 Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importSettings(event)">
+    <button class="btn btn-danger" onclick="resetSettings()">↺ Reset</button>
+    <button class="btn btn-primary" onclick="saveSettings()">✓ Save All</button>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDE NAV -->
+  <div class="sidenav">
+    <div class="sidenav-section">General</div>
+    <div class="nav-item active" onclick="showSection('location',this)">📍 Location</div>
+    <div class="nav-item" onclick="showSection('time',this)">🕐 Time & Date</div>
+    <div class="nav-item" onclick="showSection('network',this)">🌐 Network</div>
+    <div class="sidenav-section">Hardware</div>
+    <div class="nav-item" onclick="showSection('audio',this)">🔊 Audio I/O</div>
+    <div class="nav-item" onclick="showSection('video',this)">📹 Video I/O</div>
+    <div class="nav-item" onclick="showSection('display',this)">🖥 Display</div>
+    <div class="sidenav-section">System</div>
+    <div class="nav-item" onclick="showSection('system',this)">ℹ System Info</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- ═══ LOCATION ═══ -->
+    <div class="section active" id="sec-location">
+      <div class="section-header">
+        <div>
+          <div class="section-title">📍 Location</div>
+          <div class="section-desc">Hotel identity and physical layout configuration</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Hotel Name</label>
+          <input class="form-input" id="s_hotel_name" placeholder="Grand Hotel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Rooms</label>
+          <input class="form-input" id="s_rooms_total" type="number" placeholder="500">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Address</label>
+          <textarea class="form-input" id="s_address" placeholder="123 Main Street, City, Country"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of Floors</label>
+          <input class="form-input" id="s_floors" type="number" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wings</label>
+          <input class="form-input" id="s_wings" placeholder="A, B, C, D, E, F, G, H">
+          <span class="form-hint">Comma-separated wing identifiers</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TIME & DATE ═══ -->
+    <div class="section" id="sec-time">
+      <div class="section-header">
+        <div>
+          <div class="section-title">🕐 Time & Date</div>
+          <div class="section-desc">Timezone, format, and synchronization settings</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Current System Time</div>
+          <div class="info-card-value" id="currentTime">--:--:--</div>
+          <div class="info-card-sub" id="currentDate">Loading...</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Server Uptime</div>
+          <div class="info-card-value" id="serverUptime">--</div>
+          <div class="info-card-sub">Since last restart</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Timezone</label>
+          <select class="form-select" id="s_timezone">
+            <option value="Local">Local (System Default)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time Format</label>
+          <select class="form-select" id="s_time_format">
+            <option value="24h">24 Hour (14:30)</option>
+            <option value="12h">12 Hour (2:30 PM)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">NTP Server</label>
+          <input class="form-input" id="s_ntp_server" placeholder="pool.ntp.org">
+          <span class="form-hint">Network Time Protocol server for sync</span>
+        </div>
+        <div class="form-group">
+          <div class="toggle-row" style="border:none;padding:0;">
+            <div class="toggle-info">
+              <div class="toggle-label">Daylight Saving Time (DST)</div>
+              <div class="toggle-desc">Automatically adjust for DST changes</div>
+            </div>
+            <div class="toggle on" id="s_dst_enabled" onclick="toggleSwitch(this)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ NETWORK ═══ -->
+    <div class="section" id="sec-network">
+      <div class="section-header">
+        <div>
+          <div class="section-title">🌐 Network</div>
+          <div class="section-desc">Server network configuration and status</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Primary IP Address</div>
+          <div class="info-card-value" id="netPrimaryIP">--</div>
+          <div class="info-card-sub" id="netAllIPs"></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Default Gateway</div>
+          <div class="info-card-value" id="netGateway">--</div>
+          <div class="info-card-sub" id="netMAC"></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">DNS Servers</div>
+          <div class="info-card-value" id="netDNS">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Connected Clients</div>
+          <div class="info-card-value" id="netClients">0</div>
+          <div class="info-card-sub">WebSocket connections</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Server Port</label>
+          <input class="form-input" id="s_server_port" type="number" placeholder="8000">
+          <span class="form-hint">Requires restart to take effect</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Network Access</label>
+          <select class="form-select" id="s_api_network">
+            <option value="lan">LAN Only (Local Network)</option>
+            <option value="wan">WAN (Internet Accessible)</option>
+            <option value="localhost">Localhost Only</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="toggle-row" style="border:none;padding:0;">
+            <div class="toggle-info">
+              <div class="toggle-label">Allow Remote Access</div>
+              <div class="toggle-desc">Permit connections from other devices</div>
+            </div>
+            <div class="toggle on" id="s_allow_remote" onclick="toggleSwitch(this)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ AUDIO I/O ═══ -->
+    <div class="section" id="sec-audio">
+      <div class="section-header">
+        <div>
+          <div class="section-title">🔊 Audio I/O</div>
+          <div class="section-desc">Audio input and output device configuration</div>
+        </div>
+        <button class="btn" onclick="refreshSystemInfo()">↻ Refresh Devices</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Default Audio Output</label>
+          <select class="form-select" id="s_default_audio_output">
+            <option value="Default">System Default</option>
+          </select>
+          <span class="form-hint">Speakers, HDMI audio, etc.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Audio Input</label>
+          <select class="form-select" id="s_default_audio_input">
+            <option value="Default">System Default</option>
+          </select>
+          <span class="form-hint">Microphone, line-in, etc.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sample Rate (Hz)</label>
+          <select class="form-select" id="s_audio_sample_rate">
+            <option value="44100">44,100 Hz (CD Quality)</option>
+            <option value="48000">48,000 Hz (Professional)</option>
+            <option value="96000">96,000 Hz (High-Res)</option>
+            <option value="192000">192,000 Hz (Studio)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bit Depth</label>
+          <select class="form-select" id="s_audio_bit_depth">
+            <option value="16">16-bit</option>
+            <option value="24">24-bit</option>
+            <option value="32">32-bit Float</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Channels</label>
+          <select class="form-select" id="s_audio_channels">
+            <option value="1">1 (Mono)</option>
+            <option value="2">2 (Stereo)</option>
+            <option value="4">4 (Quad)</option>
+            <option value="6">6 (5.1 Surround)</option>
+            <option value="8">8 (7.1 Surround)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-desc" style="margin-bottom:12px;font-size:12px;color:var(--text);font-weight:700;">Detected Audio Output Devices</div>
+        <div class="device-list" id="audioOutputList">
+          <div class="status-bar"><div class="status-dot amber"></div>Scanning devices...</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-desc" style="margin-bottom:12px;font-size:12px;color:var(--text);font-weight:700;">Detected Audio Input Devices</div>
+        <div class="device-list" id="audioInputList">
+          <div class="status-bar"><div class="status-dot amber"></div>Scanning devices...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VIDEO I/O ═══ -->
+    <div class="section" id="sec-video">
+      <div class="section-header">
+        <div>
+          <div class="section-title">📹 Video I/O</div>
+          <div class="section-desc">Video input sources and output configuration</div>
+        </div>
+        <button class="btn" onclick="refreshSystemInfo()">↻ Refresh Devices</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Default Video Output</label>
+          <select class="form-select" id="s_default_video_output">
+            <option value="Primary">Primary Display</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Video Input</label>
+          <select class="form-select" id="s_default_video_input">
+            <option value="None">None</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Video Resolution</label>
+          <select class="form-select" id="s_video_resolution">
+            <option value="auto">Auto (Native)</option>
+            <option value="3840x2160">4K UHD (3840×2160)</option>
+            <option value="2560x1440">QHD (2560×1440)</option>
+            <option value="1920x1080">Full HD (1920×1080)</option>
+            <option value="1280x720">HD (1280×720)</option>
+            <option value="720x480">SD (720×480)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Refresh Rate (Hz)</label>
+          <select class="form-select" id="s_video_refresh_rate">
+            <option value="60">60 Hz</option>
+            <option value="59">59.94 Hz</option>
+            <option value="50">50 Hz</option>
+            <option value="30">30 Hz</option>
+            <option value="24">24 Hz</option>
+            <option value="120">120 Hz</option>
+            <option value="144">144 Hz</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-desc" style="margin-bottom:12px;font-size:12px;color:var(--text);font-weight:700;">Detected Video Inputs</div>
+        <div class="device-list" id="videoInputList">
+          <div class="status-bar"><div class="status-dot amber"></div>Scanning devices...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DISPLAY ═══ -->
+    <div class="section" id="sec-display">
+      <div class="section-header">
+        <div>
+          <div class="section-title">🖥 Display</div>
+          <div class="section-desc">Screen resolution, layout, and display settings</div>
+        </div>
+        <button class="btn" onclick="refreshSystemInfo()">↻ Refresh Displays</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Screen Width (px)</label>
+          <input class="form-input" id="s_screen_width" type="number" placeholder="1920">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Screen Height (px)</label>
+          <input class="form-input" id="s_screen_height" type="number" placeholder="1080">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Aspect Ratio</label>
+          <select class="form-select" id="s_aspect_ratio">
+            <option value="16:9">16:9 (Widescreen)</option>
+            <option value="16:10">16:10</option>
+            <option value="4:3">4:3 (Standard)</option>
+            <option value="21:9">21:9 (Ultrawide)</option>
+            <option value="32:9">32:9 (Super Ultrawide)</option>
+            <option value="9:16">9:16 (Portrait)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Overscan (%)</label>
+          <input class="form-input" id="s_overscan_percent" type="number" min="0" max="20" placeholder="0">
+          <span class="form-hint">TV overscan compensation (0-20%)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Display Count</label>
+          <input class="form-input" id="s_display_count" type="number" min="1" max="16" placeholder="1">
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="section-desc" style="margin-bottom:12px;font-size:12px;color:var(--text);font-weight:700;">Detected Displays</div>
+        <div class="device-list" id="displayList">
+          <div class="status-bar"><div class="status-dot amber"></div>Scanning displays...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SYSTEM INFO ═══ -->
+    <div class="section" id="sec-system">
+      <div class="section-header">
+        <div>
+          <div class="section-title">ℹ System Information</div>
+          <div class="section-desc">Server hardware and software details</div>
+        </div>
+        <button class="btn" onclick="refreshSystemInfo()">↻ Refresh</button>
+      </div>
+      <div class="info-grid" id="systemInfoGrid">
+        <div class="info-card">
+          <div class="info-card-label">Hostname</div>
+          <div class="info-card-value" id="sysHostname">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Operating System</div>
+          <div class="info-card-value" id="sysOS">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">CPU Usage</div>
+          <div class="info-card-value" id="sysCPU">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Memory</div>
+          <div class="info-card-value" id="sysMemory">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Go Version</div>
+          <div class="info-card-value" id="sysGo">--</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Server Port</div>
+          <div class="info-card-value" id="sysPort">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE BAR -->
+    <div class="save-bar">
+      <div class="save-status" id="saveStatus">All changes saved</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="exportSettings()">📥 Export</button>
+        <button class="btn btn-primary" onclick="saveSettings()">✓ Save All</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let settings = {};
+let systemInfo = {};
+
+// ─── Navigation ───
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('sec-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ─── Toggle Switch ───
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+}
+
+function getToggleValue(id) {
+  return document.getElementById(id).classList.contains('on');
+}
+
+function setToggleValue(id, val) {
+  var el = document.getElementById(id);
+  if (val) el.classList.add('on'); else el.classList.remove('on');
+}
+
+// ─── Load Settings ───
+function loadSettings() {
+  fetch('/api/settings').then(function(r) { return r.json(); }).then(function(data) {
+    settings = data;
+    populateForm();
+    document.getElementById('hotelNameSub').textContent = (data.hotel_name || 'HotelMP3') + ' Control System';
+  });
+}
+
+function loadSystemInfo() {
+  fetch('/api/system/info').then(function(r) { return r.json(); }).then(function(data) {
+    systemInfo = data;
+    populateSystemInfo();
+  });
+}
+
+function loadTimezones() {
+  fetch('/api/timezones').then(function(r) { return r.json(); }).then(function(data) {
+    var sel = document.getElementById('s_timezone');
+    sel.innerHTML = '';
+    (data.timezones || []).forEach(function(tz) {
+      var opt = document.createElement('option');
+      opt.value = tz;
+      opt.textContent = tz;
+      sel.appendChild(opt);
+    });
+    if (settings.timezone) sel.value = settings.timezone;
+  });
+}
+
+// ─── Populate Form ───
+function populateForm() {
+  var fields = [
+    'hotel_name', 'address', 'timezone', 'floors', 'wings', 'rooms_total',
+    'time_format', 'ntp_server', 'server_port', 'api_network',
+    'default_audio_output', 'default_audio_input', 'audio_sample_rate', 'audio_bit_depth', 'audio_channels',
+    'default_video_output', 'default_video_input', 'video_resolution', 'video_refresh_rate',
+    'screen_width', 'screen_height', 'aspect_ratio', 'overscan_percent', 'display_count'
+  ];
+  fields.forEach(function(f) {
+    var el = document.getElementById('s_' + f);
+    if (!el) return;
+    if (settings[f] !== undefined && settings[f] !== null) {
+      el.value = settings[f];
+    }
+  });
+  setToggleValue('s_dst_enabled', settings.dst_enabled);
+  setToggleValue('s_allow_remote', settings.allow_remote);
+}
+
+// ─── Populate System Info ───
+function populateSystemInfo() {
+  if (systemInfo.hostname) document.getElementById('sysHostname').textContent = systemInfo.hostname;
+  if (systemInfo.os) document.getElementById('sysOS').textContent = systemInfo.os;
+  if (systemInfo.cpu_usage) document.getElementById('sysCPU').textContent = systemInfo.cpu_usage;
+  if (systemInfo.memory_used) document.getElementById('sysMemory').textContent = systemInfo.memory_used;
+  if (systemInfo.go_version) document.getElementById('sysGo').textContent = systemInfo.go_version;
+  if (systemInfo.server_port) document.getElementById('sysPort').textContent = systemInfo.server_port;
+
+  // Network
+  if (systemInfo.primary_ip) {
+    document.getElementById('netPrimaryIP').textContent = systemInfo.primary_ip;
+    document.getElementById('netAllIPs').textContent = (systemInfo.local_ips || []).join(', ');
+  }
+  if (systemInfo.gateway) document.getElementById('netGateway').textContent = systemInfo.gateway;
+  if (systemInfo.mac_addresses) document.getElementById('netMAC').textContent = systemInfo.mac_addresses.join(', ');
+  if (systemInfo.dns_servers) document.getElementById('netDNS').textContent = systemInfo.dns_servers.join(', ');
+  if (systemInfo.connected_ws !== undefined) document.getElementById('netClients').textContent = systemInfo.connected_ws;
+  if (systemInfo.uptime) document.getElementById('serverUptime').textContent = systemInfo.uptime;
+
+  // Audio outputs
+  renderDeviceList('audioOutputList', systemInfo.audio_outputs || [], 'output');
+  // Audio inputs
+  renderDeviceList('audioInputList', systemInfo.audio_inputs || [], 'input');
+  // Video inputs
+  renderDeviceList('videoInputList', systemInfo.video_inputs || [], 'video');
+  // Displays
+  renderDisplayList(systemInfo.displays || []);
+
+  // Update audio/video dropdowns
+  updateDeviceDropdowns();
+}
+
+function renderDeviceList(containerId, devices, type) {
+  var container = document.getElementById(containerId);
+  if (!devices || devices.length === 0) {
+    container.innerHTML = '<div class="status-bar"><div class="status-dot red"></div>No ' + type + ' devices detected</div>';
+    return;
+  }
+  container.innerHTML = devices.map(function(d) {
+    var badge = '';
+    if (d.default) badge = '<span class="device-badge default">Default</span>';
+    else if (d.status && d.status.toLowerCase() !== 'ok') badge = '<span class="device-badge offline">' + d.status + '</span>';
+    else badge = '<span class="device-badge active">Active</span>';
+    var icon = type === 'input' ? '🎤' : (type === 'video' ? '📹' : '🔊');
+    var detail = d.id || d.status || '';
+    return '<div class="device-item">' +
+      '<div class="device-icon">' + icon + '</div>' +
+      '<div class="device-info">' +
+        '<div class="device-name">' + d.name + '</div>' +
+        '<div class="device-detail">' + detail + '</div>' +
+      '</div>' + badge +
+    '</div>';
+  }).join('');
+}
+
+function renderDisplayList(displays) {
+  var container = document.getElementById('displayList');
+  if (!displays || displays.length === 0) {
+    container.innerHTML = '<div class="status-bar"><div class="status-dot red"></div>No displays detected</div>';
+    return;
+  }
+  container.innerHTML = displays.map(function(d) {
+    var badge = d.primary ? '<span class="device-badge default">Primary</span>' : '<span class="device-badge active">Active</span>';
+    var size = d.size_inches ? d.size_inches + '" ' : '';
+    var res = d.width && d.height ? d.width + '×' + d.height : '';
+    var refresh = d.refresh ? d.refresh + 'Hz' : '';
+    var model = d.model || d.name || 'Unknown';
+    return '<div class="device-item">' +
+      '<div class="device-icon">🖥</div>' +
+      '<div class="device-info">' +
+        '<div class="device-name">' + model + ' ' + size + '</div>' +
+        '<div class="device-detail">' + res + ' @ ' + refresh + (d.vram ? ' · VRAM: ' + d.vram : '') + '</div>' +
+      '</div>' + badge +
+    '</div>';
+  }).join('');
+}
+
+function updateDeviceDropdowns() {
+  // Audio outputs
+  var audioOutSel = document.getElementById('s_default_audio_output');
+  var currentOut = audioOutSel.value;
+  audioOutSel.innerHTML = '';
+  var opt = document.createElement('option'); opt.value = 'Default'; opt.textContent = 'System Default'; audioOutSel.appendChild(opt);
+  (systemInfo.audio_outputs || []).forEach(function(d) {
+    opt = document.createElement('option'); opt.value = d.name; opt.textContent = d.name; audioOutSel.appendChild(opt);
+  });
+  audioOutSel.value = currentOut || settings.default_audio_output || 'Default';
+
+  // Audio inputs
+  var audioInSel = document.getElementById('s_default_audio_input');
+  var currentIn = audioInSel.value;
+  audioInSel.innerHTML = '';
+  opt = document.createElement('option'); opt.value = 'Default'; opt.textContent = 'System Default'; audioInSel.appendChild(opt);
+  (systemInfo.audio_inputs || []).forEach(function(d) {
+    opt = document.createElement('option'); opt.value = d.name; opt.textContent = d.name; audioInSel.appendChild(opt);
+  });
+  audioInSel.value = currentIn || settings.default_audio_input || 'Default';
+
+  // Video outputs
+  var videoOutSel = document.getElementById('s_default_video_output');
+  var currentVO = videoOutSel.value;
+  videoOutSel.innerHTML = '';
+  opt = document.createElement('option'); opt.value = 'Primary'; opt.textContent = 'Primary Display'; videoOutSel.appendChild(opt);
+  (systemInfo.displays || []).forEach(function(d, i) {
+    opt = document.createElement('option'); opt.value = d.name; opt.textContent = 'Display ' + (i+1) + ': ' + d.name; videoOutSel.appendChild(opt);
+  });
+  videoOutSel.value = currentVO || settings.default_video_output || 'Primary';
+
+  // Video inputs
+  var videoInSel = document.getElementById('s_default_video_input');
+  var currentVI = videoInSel.value;
+  videoInSel.innerHTML = '';
+  opt = document.createElement('option'); opt.value = 'None'; opt.textContent = 'None'; videoInSel.appendChild(opt);
+  (systemInfo.video_inputs || []).forEach(function(d) {
+    opt = document.createElement('option'); opt.value = d.name; opt.textContent = d.name; videoInSel.appendChild(opt);
+  });
+  videoInSel.value = currentVI || settings.default_video_input || 'None';
+}
+
+// ─── Save Settings ───
+function saveSettings() {
+  var data = {
+    hotel_name: document.getElementById('s_hotel_name').value,
+    address: document.getElementById('s_address').value,
+    timezone: document.getElementById('s_timezone').value,
+    floors: parseInt(document.getElementById('s_floors').value) || 10,
+    wings: document.getElementById('s_wings').value,
+    rooms_total: parseInt(document.getElementById('s_rooms_total').value) || 500,
+    time_format: document.getElementById('s_time_format').value,
+    dst_enabled: getToggleValue('s_dst_enabled'),
+    ntp_server: document.getElementById('s_ntp_server').value,
+    server_port: parseInt(document.getElementById('s_server_port').value) || 8000,
+    allow_remote: getToggleValue('s_allow_remote'),
+    api_network: document.getElementById('s_api_network').value,
+    default_audio_output: document.getElementById('s_default_audio_output').value,
+    default_audio_input: document.getElementById('s_default_audio_input').value,
+    audio_sample_rate: parseInt(document.getElementById('s_audio_sample_rate').value) || 48000,
+    audio_bit_depth: parseInt(document.getElementById('s_audio_bit_depth').value) || 16,
+    audio_channels: parseInt(document.getElementById('s_audio_channels').value) || 2,
+    default_video_output: document.getElementById('s_default_video_output').value,
+    default_video_input: document.getElementById('s_default_video_input').value,
+    video_resolution: document.getElementById('s_video_resolution').value,
+    video_refresh_rate: parseInt(document.getElementById('s_video_refresh_rate').value) || 60,
+    screen_width: parseInt(document.getElementById('s_screen_width').value) || 1920,
+    screen_height: parseInt(document.getElementById('s_screen_height').value) || 1080,
+    aspect_ratio: document.getElementById('s_aspect_ratio').value,
+    overscan_percent: parseInt(document.getElementById('s_overscan_percent').value) || 0,
+    display_count: parseInt(document.getElementById('s_display_count').value) || 1
+  };
+
+  fetch('/api/settings/update', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); }).then(function(resp) {
+    document.getElementById('saveStatus').textContent = '✓ All changes saved';
+    document.getElementById('saveStatus').className = 'save-status saved';
+    setTimeout(function() {
+      document.getElementById('saveStatus').textContent = 'All changes saved';
+      document.getElementById('saveStatus').className = 'save-status';
+    }, 3000);
+  }).catch(function() {
+    document.getElementById('saveStatus').textContent = '✗ Save failed';
+    document.getElementById('saveStatus').className = '';
+  });
+}
+
+// ─── Export / Import / Reset ───
+function exportSettings() {
+  window.location.href = '/api/settings/export';
+}
+
+function importSettings(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      fetch('/api/settings/import', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).then(function() {
+        loadSettings();
+        alert('Settings imported successfully');
+      });
+    } catch(err) {
+      alert('Invalid settings file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetSettings() {
+  if (!confirm('Reset all settings to defaults? This cannot be undone.')) return;
+  fetch('/api/settings/reset', {method: 'POST'}).then(function() {
+    loadSettings();
+    alert('Settings reset to defaults');
+  });
+}
+
+function refreshSystemInfo() {
+  loadSystemInfo();
+}
+
+// ─── Clock ───
+function updateClock() {
+  var now = new Date();
+  var fmt = (settings && settings.time_format === '12h') ? '12h' : '24h';
+  var timeStr, ampm = '';
+  if (fmt === '12h') {
+    var h = now.getHours();
+    ampm = h >= 12 ? ' PM' : ' AM';
+    h = h % 12; if (h === 0) h = 12;
+    timeStr = h + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0') + ampm;
+  } else {
+    timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+  }
+  var dateStr = now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  var el = document.getElementById('currentTime');
+  if (el) el.textContent = timeStr;
+  var del = document.getElementById('currentDate');
+  if (del) del.textContent = dateStr;
+}
+
+// ─── Init ───
+loadSettings();
+loadSystemInfo();
+loadTimezones();
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
