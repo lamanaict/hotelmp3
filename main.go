@@ -342,11 +342,18 @@ func main() {
 	
 	// Load settings
 	loadSettings()
+	
+	// Initialize activity log
+	initActivityLog()
+	
+	// Initialize dashboard
+	addActivity("system", "info", "HotelMP3 server started", fmt.Sprintf("Port %d", *port))
 
 	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handleIndex)
 	mux.HandleFunc("/settings", handleSettingsPage)
+	mux.HandleFunc("/dashboard", handleDashboardPage)
 	mux.HandleFunc("/phone", handlePhone)
 	mux.HandleFunc("/api/state", handleState)
 	mux.HandleFunc("/api/zones/", handleZones)
@@ -391,6 +398,13 @@ func main() {
 	mux.HandleFunc("/api/settings", handleSettingsGet)
 	mux.HandleFunc("/api/system/info", handleSystemInfo)
 	mux.HandleFunc("/api/timezones", handleTimezones)
+	// Dashboard routes
+	mux.HandleFunc("/api/dashboard/stats", handleDashboardStats)
+	mux.HandleFunc("/api/dashboard/zones", handleDashboardZones)
+	mux.HandleFunc("/api/dashboard/channels", handleDashboardChannels)
+	mux.HandleFunc("/api/dashboard/activity", handleDashboardActivity)
+	mux.HandleFunc("/api/dashboard/health", handleDashboardHealth)
+	mux.HandleFunc("/api/dashboard/action", handleDashboardAction)
 	mux.HandleFunc("/ws", handleWebSocket)
 
 	addr := fmt.Sprintf("0.0.0.0:%d", *port)
@@ -444,6 +458,9 @@ func main() {
 
 // ─── Stub handlers (defined in handlers.go / media.go) ─────────
 
+func handleDashboardPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, filepath.Join(staticDir, "dashboard.html"))
+}
 func handleSettingsPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filepath.Join(staticDir, "settings.html"))
 }

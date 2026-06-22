@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelMP3 — Dashboard</title>
+<style>
+:root {
+  --bg: #060a10;
+  --bg2: #0a1018;
+  --surface: #0d1520;
+  --surface-2: #111d2b;
+  --surface-3: #162535;
+  --border: #1a2a3d;
+  --border-light: #243650;
+  --text: #e8edf2;
+  --text-dim: #8899aa;
+  --text-muted: #556677;
+  --blue: #3b82f6;
+  --blue-glow: rgba(59,130,246,0.15);
+  --green: #10b981;
+  --green-glow: rgba(16,185,129,0.15);
+  --red: #ef4444;
+  --red-glow: rgba(239,68,68,0.15);
+  --orange: #f59e0b;
+  --orange-glow: rgba(245,158,11,0.15);
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6,182,212,0.15);
+  --purple: #8b5cf6;
+  --purple-glow: rgba(139,92,246,0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── TOP BAR ─── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px; background: rgba(13,21,32,0.95);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-logo { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; }
+.topbar-logo span { color: var(--blue); }
+.topbar-nav { display: flex; gap: 4px; }
+.topbar-nav a {
+  padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 600;
+  color: var(--text-dim); text-decoration: none; transition: all 0.2s;
+}
+.topbar-nav a:hover { background: var(--surface-2); color: var(--text); }
+.topbar-nav a.active { background: var(--blue-glow); color: var(--blue); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700;
+}
+.status-pill.healthy { background: var(--green-glow); color: var(--green); }
+.status-pill.degraded { background: var(--orange-glow); color: var(--orange); }
+.status-pill.error { background: var(--red-glow); color: var(--red); }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ─── LAYOUT ─── */
+.layout { padding: 20px; max-width: 1600px; margin: 0 auto; }
+
+/* ─── STAT CARDS ROW ─── */
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border-light); }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-card.blue::before { background: var(--blue); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.orange::before { background: var(--orange); }
+.stat-card.cyan::before { background: var(--cyan); }
+.stat-card.purple::before { background: var(--purple); }
+.stat-card.red::before { background: var(--red); }
+.stat-icon { font-size: 20px; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-top: 4px; }
+.stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* ─── GRID SECTIONS ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-4 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 1200px) { .grid-3 { grid-template-columns: 1fr 1fr; } .grid-4 { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ─── PANEL ─── */
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text); }
+.panel-actions { display: flex; gap: 6px; }
+.panel-btn {
+  padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text-dim); font-size: 10px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.panel-btn:hover { border-color: var(--blue); color: var(--text); }
+.panel-body { padding: 16px; max-height: 400px; overflow-y: auto; }
+.panel-body.no-max { max-height: none; }
+
+/* ─── TABLE ─── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left; padding: 8px 12px; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 12px; font-size: 11px; color: var(--text);
+  border-bottom: 1px solid rgba(26,42,61,0.5);
+}
+.data-table tr:hover td { background: var(--surface-2); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ─── ZONE CARDS ─── */
+.zone-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.zone-card {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s;
+}
+.zone-card:hover { border-color: var(--border-light); }
+.zone-card.on { border-left: 3px solid var(--green); }
+.zone-card.off { border-left: 3px solid var(--red); opacity: 0.6; }
+.zone-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.zone-card-name { font-size: 12px; font-weight: 700; }
+.zone-card-type { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+.zone-card-source { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+.zone-card-vol { display: flex; align-items: center; gap: 6px; }
+.zone-card-bar { flex: 1; height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.zone-card-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.zone-card-vol-num { font-size: 9px; color: var(--text-muted); min-width: 28px; text-align: right; }
+
+/* ─── CHANNEL LIST ─── */
+.channel-list { display: flex; flex-direction: column; gap: 4px; }
+.channel-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  background: var(--surface-2); border-radius: 8px; transition: background 0.2s;
+}
+.channel-row:hover { background: var(--surface-3); }
+.channel-row.active { border: 1px solid var(--orange); }
+.channel-num { font-size: 16px; font-weight: 800; color: var(--text-muted); min-width: 28px; text-align: center; }
+.channel-row.active .channel-num { color: var(--orange); }
+.channel-info { flex: 1; min-width: 0; }
+.channel-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.channel-group { font-size: 9px; color: var(--text-muted); }
+.channel-viewers { font-size: 10px; color: var(--text-dim); }
+.channel-status { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.channel-status.active { background: var(--green); }
+.channel-status.offline { background: var(--red); }
+
+/* ─── ACTIVITY LOG ─── */
+.activity-list { display: flex; flex-direction: column; gap: 2px; }
+.activity-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px;
+  border-radius: 6px; transition: background 0.2s;
+}
+.activity-item:hover { background: var(--surface-2); }
+.activity-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.activity-dot.info { background: var(--blue); }
+.activity-dot.success { background: var(--green); }
+.activity-dot.warning { background: var(--orange); }
+.activity-dot.error { background: var(--red); }
+.activity-dot.action { background: var(--purple); }
+.activity-time { font-size: 9px; font-family: 'SF Mono', 'Consolas', monospace; color: var(--text-muted); min-width: 60px; flex-shrink: 0; }
+.activity-msg { font-size: 11px; color: var(--text); flex: 1; }
+.activity-cat {
+  font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+}
+.activity-cat.zone { background: rgba(16,185,129,0.15); color: var(--green); }
+.activity-cat.channel { background: rgba(245,158,11,0.15); color: var(--orange); }
+.activity-cat.media { background: rgba(6,182,212,0.15); color: var(--cyan); }
+.activity-cat.system { background: rgba(139,92,246,0.15); color: var(--purple); }
+.activity-cat.network { background: rgba(59,130,246,0.15); color: var(--blue); }
+.activity-cat.settings { background: rgba(245,158,11,0.15); color: var(--orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress-bar { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+/* ─── QUICK ACTIONS ─── */
+.actions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.action-btn {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.action-btn:hover { border-color: var(--border-light); background: var(--surface-3); }
+.action-btn-icon { font-size: 18px; }
+.action-btn-label { font-size: 11px; font-weight: 600; color: var(--text); }
+.action-btn-desc { font-size: 9px; color: var(--text-muted); }
+
+/* ─── HEALTH CHECK ─── */
+.health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.health-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--surface-2); border-radius: 8px;
+}
+.health-icon { font-size: 14px; }
+.health-name { font-size: 11px; font-weight: 600; }
+.health-status { font-size: 9px; margin-left: auto; }
+.health-status.ok { color: var(--green); }
+.health-status.fail { color: var(--red); }
+
+/* ─── FILTER TABS ─── */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 5px 12px; border-radius: 6px; font-size: 10px; font-weight: 700;
+  color: var(--text-muted); cursor: pointer; border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.filter-tab:hover { color: var(--text); border-color: var(--border); }
+.filter-tab.active { background: var(--blue-glow); color: var(--blue); border-color: var(--blue); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/" class="topbar-logo" style="text-decoration:none;color:var(--text);">Hotel<span>MP3</span></a>
+    <div class="topbar-nav">
+      <a href="/dashboard" class="active">📊 Dashboard</a>
+      <a href="/">🎛 Control</a>
+      <a href="/settings">⚙ Settings</a>
+      <a href="/phone">📱 Phone</a>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill healthy" id="healthPill">
+      <div class="live-dot"></div>
+      <span id="healthText">HEALTHY</span>
+    </div>
+    <span style="font-size:10px;color:var(--text-muted);" id="clock">00:00:00</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ═══ STAT CARDS ═══ -->
+  <div class="stat-row" id="statRow">
+    <div class="stat-card blue">
+      <div class="stat-icon">🖥</div>
+      <div class="stat-value" id="sZones">0</div>
+      <div class="stat-label">Total Zones</div>
+      <div class="stat-sub" id="sZonesOn">0 online</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">📺</div>
+      <div class="stat-value" id="sChannels">0</div>
+      <div class="stat-label">Channels</div>
+      <div class="stat-sub" id="sChActive">0 active</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">👁</div>
+      <div class="stat-value" id="sViewers">0</div>
+      <div class="stat-label">Total Viewers</div>
+      <div class="stat-sub">Across all channels</div>
+    </div>
+    <div class="stat-card cyan">
+      <div class="stat-icon">🔌</div>
+      <div class="stat-value" id="sPowered">0</div>
+      <div class="stat-label">Powered On</div>
+      <div class="stat-sub" id="sPoweredPct">0% of zones</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon">🔗</div>
+      <div class="stat-value" id="sClients">0</div>
+      <div class="stat-label">WS Clients</div>
+      <div class="stat-sub">Connected devices</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⏱</div>
+      <div class="stat-value" id="sUptime" style="font-size:18px;">0m</div>
+      <div class="stat-label">Uptime</div>
+      <div class="stat-sub" id="sMemory">--</div>
+    </div>
+  </div>
+
+  <!-- ═══ ZONES + CHANNELS ═══ -->
+  <div class="grid-4">
+    <!-- ZONES -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🏢 Zones / Rooms</span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="filterZones('all')">All</button>
+          <button class="panel-btn" onclick="filterZones('online')">Online</button>
+          <button class="panel-btn" onclick="filterZones('powered')">Powered</button>
+          <button class="panel-btn" onclick="dashAction('reboot_zone','')">↻ Reboot</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="zone-grid" id="zoneGrid">
+          <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Loading zones...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📺 Channel Lineup</span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="loadChannels()">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="channel-list" id="channelList">
+          <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Loading channels...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ZONE DETAIL + ACTIVITY ═══ -->
+  <div class="grid-2">
+    <!-- ZONE DETAIL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" id="zoneDetailTitle">🎛 Zone Detail</span>
+        <div class="panel-actions">
+          <button class="panel-btn" id="zonePowerBtn" onclick="toggleZonePower()" style="display:none;">⏻ Toggle Power</button>
+        </div>
+      </div>
+      <div class="panel-body no-max" id="zoneDetailBody">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Select a zone to view details</div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 Activity Log</span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="filterActivity('all')">All</button>
+          <button class="panel-btn" onclick="filterActivity('zone')">Zone</button>
+          <button class="panel-btn" onclick="filterActivity('channel')">Channel</button>
+          <button class="panel-btn" onclick="filterActivity('system')">System</button>
+          <button class="panel-btn" onclick="dashAction('clear_activity','')">Clear</button>
+        </div>
+      </div>
+      <div class="panel-body" id="activityList">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Loading activity...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SYSTEM + NETWORK + HEALTH ═══ -->
+  <div class="grid-3">
+    <!-- SYSTEM -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">ℹ System Info</span>
+        <button class="panel-btn" onclick="refreshSystem()">↻ Refresh</button>
+      </div>
+      <div class="panel-body no-max">
+        <div style="display:flex;flex-direction:column;gap:8px;" id="systemInfo">
+          <div style="font-size:11px;color:var(--text-muted);">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NETWORK -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🌐 Network</span>
+      </div>
+      <div class="panel-body no-max">
+        <div style="display:flex;flex-direction:column;gap:8px;" id="networkInfo">
+          <div style="font-size:11px;color:var(--text-muted);">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEALTH -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">❤ Health Check</span>
+        <button class="panel-btn" onclick="checkHealth()">↻ Check</button>
+      </div>
+      <div class="panel-body no-max">
+        <div class="health-grid" id="healthGrid">
+          <div style="font-size:11px;color:var(--text-muted);">Checking...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ QUICK ACTIONS ═══ -->
+  <div class="panel" style="margin-bottom:20px;">
+    <div class="panel-header">
+      <span class="panel-title">⚡ Quick Actions</span>
+    </div>
+    <div class="panel-body">
+      <div class="actions-grid">
+        <div class="action-btn" onclick="dashAction('power_all_on','')">
+          <span class="action-btn-icon">⏻</span>
+          <div>
+            <div class="action-btn-label">All Zones On</div>
+            <div class="action-btn-desc">Power on every zone</div>
+          </div>
+        </div>
+        <div class="action-btn" onclick="dashAction('power_all_off','')">
+          <span class="action-btn-icon">⭘</span>
+          <div>
+            <div class="action-btn-label">All Zones Off</div>
+            <div class="action-btn-desc">Power off every zone</div>
+          </div>
+        </div>
+        <div class="action-btn" onclick="dashAction('scan_media','')">
+          <span class="action-btn-icon">🔍</span>
+          <div>
+            <div class="action-btn-label">Scan Media</div>
+            <div class="action-btn-desc">Rescan media library</div>
+          </div>
+        </div>
+        <div class="action-btn" onclick="dashAction('refresh_channels','')">
+          <span class="action-btn-icon">📺</span>
+          <div>
+            <div class="action-btn-label">Refresh Channels</div>
+            <div class="action-btn-desc">Reload channel lineup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let dashboardStats = {};
+let zones = {};
+let channels = {};
+let activities = [];
+let selectedZone = null;
+let activityFilter = 'all';
+let zoneFilter = 'all';
+let refreshInterval;
+
+// ─── Clock ───
+function updateClock() {
+  var now = new Date();
+  var el = document.getElementById('clock');
+  if (el) el.textContent = now.toLocaleTimeString('en-US', {hour12:false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── Fetch Stats ───
+function fetchStats() {
+  fetch('/api/dashboard/stats').then(function(r) { return r.json(); }).then(function(data) {
+    dashboardStats = data;
+    updateStatCards();
+  }).catch(function() {});
+}
+
+function updateStatCards() {
+  if (!dashboardStats.server) return;
+  document.getElementById('sZones').textContent = dashboardStats.zones.total || 0;
+  document.getElementById('sZonesOn').textContent = (dashboardStats.zones.online || 0) + ' online';
+  document.getElementById('sChannels').textContent = dashboardStats.channels.total || 0;
+  document.getElementById('sChActive').textContent = (dashboardStats.channels.active || 0) + ' active';
+  document.getElementById('sViewers').textContent = dashboardStats.channels.total_viewers || 0;
+  document.getElementById('sPowered').textContent = dashboardStats.zones.powered || 0;
+  var pct = dashboardStats.zones.total > 0 ? Math.round((dashboardStats.zones.powered / dashboardStats.zones.total) * 100) : 0;
+  document.getElementById('sPoweredPct').textContent = pct + '% of zones';
+  document.getElementById('sClients').textContent = dashboardStats.network.connected_clients || 0;
+  document.getElementById('sUptime').textContent = dashboardStats.server.uptime || '--';
+  document.getElementById('sMemory').textContent = dashboardStats.server.memory_mb || '--';
+}
+
+// ─── Fetch Zones ───
+function fetchZones() {
+  fetch('/api/dashboard/zones').then(function(r) { return r.json(); }).then(function(data) {
+    zones = data.zones || {};
+    channels = data.channels || {};
+    renderZones();
+    renderChannelList();
+  }).catch(function() {});
+}
+
+function renderZones() {
+  var grid = document.getElementById('zoneGrid');
+  var zoneArr = Object.values(zones);
+  
+  if (zoneFilter === 'online') zoneArr = zoneArr.filter(function(z) { return z.online; });
+  else if (zoneFilter === 'powered') zoneArr = zoneArr.filter(function(z) { return z.power; });
+
+  if (zoneArr.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No zones found</div>';
+    return;
+  }
+
+  grid.innerHTML = zoneArr.map(function(z) {
+    var cls = z.power ? 'on' : 'off';
+    var ch = channels[z.source_id];
+    var srcName = ch ? (ch.number + ' — ' + ch.name) : (z.source_id || '—');
+    var srcIcon = ch ? '📺' : '📡';
+    var vol = z.audio_volume || 0;
+    var volColor = z.audio_muted ? 'var(--red)' : (vol > 80 ? 'var(--orange)' : 'var(--blue)');
+    var isSelected = selectedZone === z.id;
+    return '<div class="zone-card ' + cls + (isSelected ? ' active' : '') + '" onclick="selectZone(\'' + z.id + '\')" style="' + (isSelected ? 'border-color:var(--blue);' : '') + '">' +
+      '<div class="zone-card-header">' +
+        '<span class="zone-card-name">' + z.name + '</span>' +
+        '<span class="zone-card-type">' + (z.type || '').replace('_', ' ') + '</span>' +
+      '</div>' +
+      '<div class="zone-card-source">' + srcIcon + ' ' + srcName + '</div>' +
+      '<div class="zone-card-vol">' +
+        '<div class="zone-card-bar"><div class="zone-card-bar-fill" style="width:' + vol + '%;background:' + volColor + ';"></div></div>' +
+        '<span class="zone-card-vol-num">' + (z.audio_muted ? 'MUTE' : vol + '%') + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function selectZone(id) {
+  selectedZone = zones[id] ? id : null;
+  renderZones();
+  renderZoneDetail();
+}
+
+function renderZoneDetail() {
+  var title = document.getElementById('zoneDetailTitle');
+  var body = document.getElementById('zoneDetailBody');
+  var powerBtn = document.getElementById('zonePowerBtn');
+  
+  if (!selectedZone || !zones[selectedZone]) {
+    title.textContent = '🎛 Zone Detail';
+    body.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Select a zone to view details</div>';
+    powerBtn.style.display = 'none';
+    return;
+  }
+
+  var z = zones[selectedZone];
+  powerBtn.style.display = 'inline-block';
+  title.textContent = '🎛 ' + z.name;
+
+  var ch = channels[z.source_id];
+  var vol = z.audio_volume || 0;
+  var volColor = z.audio_muted ? 'var(--red)' : 'var(--blue)';
+
+  body.innerHTML = 
+    '<div style="display:flex;flex-direction:column;gap:10px;">' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Status</div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + (z.power ? 'var(--green)' : 'var(--red)') + ';">' + (z.power ? '● ONLINE' : '○ OFFLINE') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);">' + (z.online ? 'Connected' : 'Disconnected') + '</div>' +
+        '</div>' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Source</div>' +
+          '<div style="font-size:13px;font-weight:700;">' + (ch ? ('📺 CH' + ch.number + ' ' + ch.name) : '📡 ' + (z.source_id || 'None')) + '</div>' +
+        '</div>' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Volume</div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + volColor + ';">' + (z.audio_muted ? '🔇 MUTED' : '🔊 ' + vol + '%') + '</div>' +
+          '<div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" style="width:' + vol + '%;background:' + volColor + ';"></div></div>' +
+        '</div>' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Microphone</div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + (z.mic_active ? 'var(--green)' : 'var(--text-muted)') + ';">' + (z.mic_active ? '🎤 Active' : '🎤 Off') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Volume: ' + (z.mic_volume || 0) + '%</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Zone Type</div>' +
+          '<div style="font-size:12px;font-weight:600;">' + (z.type || '—').replace(/_/g, ' ') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);">ID: ' + z.id + '</div>' +
+        '</div>' +
+        '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Group</div>' +
+          '<div style="font-size:12px;font-weight:600;">' + (z.group ? 'Group ' + z.group : 'Ungrouped') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);">Encryption: ' + (z.hud_encryption || 'None') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="padding:10px;background:var(--surface-2);border-radius:8px;">' +
+        '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">EQ / Audio</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">' +
+          '<div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);">Bass</div><div style="font-size:12px;font-weight:700;">' + (z.eq_bass || 0) + '</div></div>' +
+          '<div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);">Mid</div><div style="font-size:12px;font-weight:700;">' + (z.eq_mid || 0) + '</div></div>' +
+          '<div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);">Treble</div><div style="font-size:12px;font-weight:700;">' + (z.eq_treble || 0) + '</div></div>' +
+          '<div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);">Balance</div><div style="font-size:12px;font-weight:700;">' + (z.balance || 0) + '</div></div>' +
+          '<div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);">Preset</div><div style="font-size:12px;font-weight:700;">' + (z.audio_preset || 'flat') + '</div></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function toggleZonePower() {
+  if (!selectedZone || !zones[selectedZone]) return;
+  var z = zones[selectedZone];
+  sendWS({type: 'update_zone', zone_id: selectedZone, update: {power: !z.power}});
+}
+
+function filterZones(f) {
+  zoneFilter = f;
+  renderZones();
+}
+
+// ─── Fetch Channels ───
+function loadChannels() {
+  fetch('/api/dashboard/channels').then(function(r) { return r.json(); }).then(function(data) {
+    channels = {};
+    (data.channels || []).forEach(function(ch) { channels[ch.id] = ch; });
+    renderChannelList();
+  });
+}
+
+function renderChannelList() {
+  var list = document.getElementById('channelList');
+  var chArr = Object.values(channels);
+  chArr.sort(function(a, b) { return (a.number || 0) - (b.number || 0); });
+
+  if (chArr.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No channels configured</div>';
+    return;
+  }
+
+  list.innerHTML = chArr.map(function(ch) {
+    var activeZones = Object.values(zones).filter(function(z) { return z.source_id === ch.id; }).length;
+    return '<div class="channel-row ' + (activeZones > 0 ? 'active' : '') + '">' +
+      '<span class="channel-num">' + ch.number + '</span>' +
+      '<div class="channel-info">' +
+        '<div class="channel-name">' + ch.name + '</div>' +
+        '<div class="channel-group">' + ch.group + (ch.stream_url ? ' · Has stream' : ' · No stream') + '</div>' +
+      '</div>' +
+      '<span class="channel-viewers">' + activeZones + ' zone' + (activeZones !== 1 ? 's' : '') + '</span>' +
+      '<span class="channel-status ' + (ch.status === 'active' ? 'active' : 'offline') + '"></span>' +
+    '</div>';
+  }).join('');
+}
+
+// ─── Activity ───
+function fetchActivity() {
+  fetch('/api/dashboard/activity?limit=100').then(function(r) { return r.json(); }).then(function(data) {
+    activities = data.activities || [];
+    renderActivity();
+  });
+}
+
+function renderActivity() {
+  var list = document.getElementById('activityList');
+  var filtered = activities;
+  if (activityFilter !== 'all') {
+    filtered = activities.filter(function(a) { return a.category === activityFilter; });
+  }
+  filtered.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+  filtered = filtered.slice(0, 80);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No activity recorded</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(a) {
+    return '<div class="activity-item fade-in">' +
+      '<span class="activity-dot ' + (a.type || 'info') + '"></span>' +
+      '<span class="activity-time">' + (a.time || '--:--:--') + '</span>' +
+      '<span class="activity-cat ' + (a.category || 'system') + '">' + (a.category || 'system') + '</span>' +
+      '<span class="activity-msg">' + a.message + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function filterActivity(f) {
+  activityFilter = f;
+  renderActivity();
+}
+
+// ─── Health ───
+function checkHealth() {
+  fetch('/api/dashboard/health').then(function(r) { return r.json(); }).then(function(data) {
+    var pill = document.getElementById('healthPill');
+    var text = document.getElementById('healthText');
+    
+    if (data.status === 'healthy') {
+      pill.className = 'status-pill healthy';
+      text.textContent = 'HEALTHY';
+    } else if (data.status === 'degraded') {
+      pill.className = 'status-pill degraded';
+      text.textContent = 'DEGRADED';
+    } else {
+      pill.className = 'status-pill error';
+      text.textContent = 'ERROR';
+    }
+
+    var checks = data.checks || {};
+    var grid = document.getElementById('healthGrid');
+    var icons = {server:'🖥', websocket:'🔌', channels:'📺', zones:'🏢', settings:'⚙', lineup:'📋', system_access:'🔧'};
+    grid.innerHTML = Object.keys(checks).map(function(k) {
+      var ok = checks[k];
+      return '<div class="health-item">' +
+        '<span class="health-icon">' + (icons[k] || '•') + '</span>' +
+        '<span class="health-name">' + k.replace(/_/g, ' ') + '</span>' +
+        '<span class="health-status ' + (ok ? 'ok' : 'fail') + '">' + (ok ? '✓ OK' : '✗ FAIL') + '</span>' +
+      '</div>';
+    }).join('');
+  });
+}
+
+// ─── System Info ───
+function refreshSystem() {
+  fetch('/api/system/info', { signal: AbortSignal.timeout(15000) }).then(function(r) { return r.json(); }).then(function(data) {
+    var sys = document.getElementById('systemInfo');
+    sys.innerHTML = renderInfoRow('Hostname', data.hostname) +
+      renderInfoRow('OS', data.os) +
+      renderInfoRow('CPU', data.cpu_usage) +
+      renderInfoRow('Memory', data.memory_used) +
+      renderInfoRow('Go Version', data.go_version) +
+      renderInfoRow('Uptime', data.uptime);
+
+    var net = document.getElementById('networkInfo');
+    net.innerHTML = renderInfoRow('Primary IP', data.primary_ip) +
+      renderInfoRow('Gateway', data.gateway) +
+      renderInfoRow('DNS', (data.dns_servers || []).join(', ')) +
+      renderInfoRow('MAC', (data.mac_addresses || []).join(', ')) +
+      renderInfoRow('Active IPs', (data.local_ips || []).length + ' interfaces');
+
+    if (data.audio_outputs && data.audio_outputs.length > 0) {
+      net.innerHTML += '<div style="margin-top:8px;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Audio Devices</div>';
+      data.audio_outputs.forEach(function(d) {
+        net.innerHTML += renderInfoRow('🔊 ' + d.name, d.status || '');
+      });
+    }
+
+    if (data.displays && data.displays.length > 0) {
+      net.innerHTML += '<div style="margin-top:8px;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Displays</div>';
+      data.displays.forEach(function(d) {
+        var res = d.width && d.height ? d.width + '×' + d.height + ' @ ' + (d.refresh || '--') + 'Hz' : '';
+        net.innerHTML += renderInfoRow('🖥 ' + (d.model || d.name), res);
+      });
+    }
+  }).catch(function() {
+    document.getElementById('systemInfo').innerHTML = '<div style="color:var(--red);font-size:11px;">Failed to load system info (timeout)</div>';
+  });
+}
+
+function renderInfoRow(label, value) {
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(26,42,61,0.3);">' +
+    '<span style="font-size:10px;color:var(--text-muted);">' + label + '</span>' +
+    '<span style="font-size:11px;font-weight:600;">' + (value || '—') + '</span>' +
+  '</div>';
+}
+
+// ─── Actions ───
+function dashAction(action, target) {
+  fetch('/api/dashboard/action', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action: action, target: target || ''})
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    // Refresh after action
+    setTimeout(function() { fetchStats(); fetchZones(); fetchActivity(); }, 500);
+  });
+}
+
+// ─── WebSocket ───
+var ws;
+function connectWS() {
+  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(proto + '://' + location.host + '/ws');
+  ws.onopen = function() {};
+  ws.onclose = function() { setTimeout(connectWS, 2000); };
+  ws.onmessage = function(evt) {
+    try {
+      var data = JSON.parse(evt.data);
+      if (data.type === 'full_state') {
+        zones = data.zones || {};
+        renderZones();
+        renderZoneDetail();
+        renderChannelList();
+      }
+      if (data.type === 'zone_update' && data.zone) {
+        zones[data.zone.id] = data.zone;
+        renderZones();
+        if (selectedZone === data.zone.id) renderZoneDetail();
+        renderChannelList();
+      }
+      if (data.type === 'lineup_refresh' || data.type === 'channel_update') {
+        fetchZones();
+      }
+      if (data.type === 'media_scan_complete' || data.type === 'media_scan_started') {
+        fetchStats();
+      }
+    } catch(e) {}
+  };
+}
+
+function sendWS(data) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data));
+}
+
+// ─── Initial Load ───
+fetchStats();
+fetchZones();
+fetchActivity();
+checkHealth();
+refreshSystem();
+connectWS();
+
+// ─── Auto Refresh ───
+refreshInterval = setInterval(function() {
+  fetchStats();
+  checkHealth();
+}, 5000);
+
+setInterval(fetchActivity, 3000);
+</script>
+</body>
+</html>
